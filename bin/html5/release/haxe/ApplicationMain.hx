@@ -28,7 +28,7 @@ import DefaultAssetLibrary;
 		
 		config = {
 			
-			build: "207",
+			build: "1",
 			company: "Alan Langlois - Etamin Studio",
 			file: "First",
 			fps: 60,

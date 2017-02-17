@@ -13,7 +13,7 @@ var ApplicationMain = function() { };
 $hxClasses["ApplicationMain"] = ApplicationMain;
 ApplicationMain.__name__ = ["ApplicationMain"];
 ApplicationMain.main = function() {
-	ApplicationMain.config = { build : "207", company : "Alan Langlois - Etamin Studio", file : "First", fps : 60, name : "First", orientation : "", packageName : "com.etamin.first.First", version : "1.0.0", windows : [{ allowHighDPI : false, antialiasing : 0, background : 16777215, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : true, height : 640, hidden : null, maximized : null, minimized : null, parameters : "{}", resizable : true, stencilBuffer : true, title : "First", vsync : false, width : 800, x : null, y : null}]};
+	ApplicationMain.config = { build : "1", company : "Alan Langlois - Etamin Studio", file : "First", fps : 60, name : "First", orientation : "", packageName : "com.etamin.first.First", version : "1.0.0", windows : [{ allowHighDPI : false, antialiasing : 0, background : 16777215, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : true, height : 640, hidden : null, maximized : null, minimized : null, parameters : "{}", resizable : true, stencilBuffer : true, title : "First", vsync : false, width : 800, x : null, y : null}]};
 };
 ApplicationMain.create = function() {
 	var app = new openfl_display_Application();
@@ -5878,19 +5878,60 @@ etaminstudio_core_view_AppRootMediator.prototype = $extend(robotlegs_bender_bund
 	}
 	,__class__: etaminstudio_core_view_AppRootMediator
 });
-var etaminstudio_core_view_AppRootView = function() {
+var robotlegs_bender_extensions_display_base_api_ILayer = function() { };
+$hxClasses["robotlegs.bender.extensions.display.base.api.ILayer"] = robotlegs_bender_extensions_display_base_api_ILayer;
+robotlegs_bender_extensions_display_base_api_ILayer.__name__ = ["robotlegs","bender","extensions","display","base","api","ILayer"];
+robotlegs_bender_extensions_display_base_api_ILayer.prototype = {
+	get_renderContext: null
+	,set_renderContext: null
+	,process: null
+	,setTo: null
+	,__class__: robotlegs_bender_extensions_display_base_api_ILayer
+	,__properties__: {set_renderContext:"set_renderContext",get_renderContext:"get_renderContext"}
+};
+var robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer = function() {
 	starling_display_Sprite.call(this);
-	haxe_Log.trace("++++ VIEW::",{ fileName : "AppRootView.hx", lineNumber : 21, className : "etaminstudio.core.view.AppRootView", methodName : "new"});
+};
+$hxClasses["robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer"] = robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer;
+robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__name__ = ["robotlegs","bender","extensions","display","stage3D","starling","impl","StarlingLayer"];
+robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__interfaces__ = [robotlegs_bender_extensions_display_base_api_ILayer];
+robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__super__ = starling_display_Sprite;
+robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.prototype = $extend(starling_display_Sprite.prototype,{
+	starling: null
+	,renderContext: null
+	,process: function() {
+		if(this.starling != null) this.starling.nextFrame();
+	}
+	,setStarling: function(starling) {
+		this.starling = starling;
+	}
+	,setTo: function(x,y,width,height) {
+		this.starling.get_viewPort().setTo(x,y,width,height);
+		this.starling.get_stage().set_stageWidth(width);
+		this.starling.get_stage().set_stageHeight(height);
+	}
+	,set_renderContext: function(value) {
+		return this.renderContext = value;
+	}
+	,get_renderContext: function() {
+		return this.renderContext;
+	}
+	,__class__: robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer
+	,__properties__: $extend(starling_display_Sprite.prototype.__properties__,{set_renderContext:"set_renderContext",get_renderContext:"get_renderContext"})
+});
+var etaminstudio_core_view_AppRootView = function() {
+	robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.call(this);
+	haxe_Log.trace("++++ VIEW::",{ fileName : "AppRootView.hx", lineNumber : 22, className : "etaminstudio.core.view.AppRootView", methodName : "new"});
 	this.addEventListener("addedToStage",$bind(this,this._onAddedToStage));
 	this.onReadySgnl = new msignal_Signal0();
 };
 $hxClasses["etaminstudio.core.view.AppRootView"] = etaminstudio_core_view_AppRootView;
 etaminstudio_core_view_AppRootView.__name__ = ["etaminstudio","core","view","AppRootView"];
-etaminstudio_core_view_AppRootView.__super__ = starling_display_Sprite;
-etaminstudio_core_view_AppRootView.prototype = $extend(starling_display_Sprite.prototype,{
+etaminstudio_core_view_AppRootView.__super__ = robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer;
+etaminstudio_core_view_AppRootView.prototype = $extend(robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.prototype,{
 	onReadySgnl: null
 	,initialize: function() {
-		haxe_Log.trace("++++++++++++++++ VIEW INITIALIZE",{ fileName : "AppRootView.hx", lineNumber : 29, className : "etaminstudio.core.view.AppRootView", methodName : "initialize"});
+		haxe_Log.trace("++++++++++++++++ VIEW INITIALIZE",{ fileName : "AppRootView.hx", lineNumber : 30, className : "etaminstudio.core.view.AppRootView", methodName : "initialize"});
 	}
 	,_onAddedToStage: function(e) {
 		this.removeEventListener("addedToStage",$bind(this,this._onAddedToStage));
@@ -5900,7 +5941,7 @@ etaminstudio_core_view_AppRootView.prototype = $extend(starling_display_Sprite.p
 		this.addChild(quad);
 	}
 	,start: function(assets) {
-		haxe_Log.trace("++++> ROOT START",{ fileName : "AppRootView.hx", lineNumber : 45, className : "etaminstudio.core.view.AppRootView", methodName : "start"});
+		haxe_Log.trace("++++> ROOT START",{ fileName : "AppRootView.hx", lineNumber : 46, className : "etaminstudio.core.view.AppRootView", methodName : "start"});
 		var navigator = new etaminstudio_core_view_Navigator(assets);
 		this.addChild(navigator);
 		this.onReadySgnl.dispatch();
@@ -20733,7 +20774,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 754496;
+	this.version = 675992;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = ["lime","utils","AssetCache"];
@@ -45063,17 +45104,6 @@ robotlegs_bender_extensions_display_base_api_IDisplayObject.prototype = {
 	,destroy: null
 	,__class__: robotlegs_bender_extensions_display_base_api_IDisplayObject
 };
-var robotlegs_bender_extensions_display_base_api_ILayer = function() { };
-$hxClasses["robotlegs.bender.extensions.display.base.api.ILayer"] = robotlegs_bender_extensions_display_base_api_ILayer;
-robotlegs_bender_extensions_display_base_api_ILayer.__name__ = ["robotlegs","bender","extensions","display","base","api","ILayer"];
-robotlegs_bender_extensions_display_base_api_ILayer.prototype = {
-	get_renderContext: null
-	,set_renderContext: null
-	,process: null
-	,setTo: null
-	,__class__: robotlegs_bender_extensions_display_base_api_ILayer
-	,__properties__: {set_renderContext:"set_renderContext",get_renderContext:"get_renderContext"}
-};
 var robotlegs_bender_extensions_display_base_api_ILayers = function() { };
 $hxClasses["robotlegs.bender.extensions.display.base.api.ILayers"] = robotlegs_bender_extensions_display_base_api_ILayers;
 robotlegs_bender_extensions_display_base_api_ILayers.__name__ = ["robotlegs","bender","extensions","display","base","api","ILayers"];
@@ -45900,36 +45930,6 @@ robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializerAva
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializerAvailable.prototype = {
 	__class__: robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializerAvailable
 };
-var robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer = function() {
-	starling_display_Sprite.call(this);
-};
-$hxClasses["robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer"] = robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer;
-robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__name__ = ["robotlegs","bender","extensions","display","stage3D","starling","impl","StarlingLayer"];
-robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__interfaces__ = [robotlegs_bender_extensions_display_base_api_ILayer];
-robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__super__ = starling_display_Sprite;
-robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.prototype = $extend(starling_display_Sprite.prototype,{
-	starling: null
-	,renderContext: null
-	,process: function() {
-		if(this.starling != null) this.starling.nextFrame();
-	}
-	,setStarling: function(starling) {
-		this.starling = starling;
-	}
-	,setTo: function(x,y,width,height) {
-		this.starling.get_viewPort().setTo(x,y,width,height);
-		this.starling.get_stage().set_stageWidth(width);
-		this.starling.get_stage().set_stageHeight(height);
-	}
-	,set_renderContext: function(value) {
-		return this.renderContext = value;
-	}
-	,get_renderContext: function() {
-		return this.renderContext;
-	}
-	,__class__: robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer
-	,__properties__: $extend(starling_display_Sprite.prototype.__properties__,{set_renderContext:"set_renderContext",get_renderContext:"get_renderContext"})
-});
 var robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingViewMap = function() {
 };
 $hxClasses["robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingViewMap"] = robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingViewMap;
@@ -57436,6 +57436,8 @@ etaminstudio_core_definitions_NavigatorTransitions.MOVE_TOP = "MoveToTheTop";
 etaminstudio_core_definitions_NavigatorTransitions.MOVE_BOTTOM = "MoveToTheBottom";
 etaminstudio_core_view_AppRootMediator.__meta__ = { fields : { view : { inject : null}, startupSgnl : { inject : null}}};
 etaminstudio_core_view_AppRootMediator.__rtti = "<class path=\"etaminstudio.core.view.AppRootMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"etaminstudio.core.view.AppRootView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<startupSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.config.StartupSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</startupSgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"23\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onReady set=\"method\" line=\"33\"><f a=\"\"><x path=\"Void\"/></f></_onReady>\n\t<new public=\"1\" set=\"method\" line=\"17\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\" params=\"\">\n\t<extends path=\"starling.display.Sprite\"/>\n\t<implements path=\"robotlegs.bender.extensions.display.base.api.ILayer\"/>\n\t<starling><c path=\"starling.core.Starling\"/></starling>\n\t<renderContext public=\"1\" get=\"accessor\" set=\"accessor\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t\t<meta><m n=\":isVar\"/></meta>\n\t</renderContext>\n\t<process public=\"1\" set=\"method\" line=\"25\"><f a=\"\"><x path=\"Void\"/></f></process>\n\t<setStarling public=\"1\" set=\"method\" line=\"30\"><f a=\"starling\">\n\t<c path=\"starling.core.Starling\"/>\n\t<x path=\"Void\"/>\n</f></setStarling>\n\t<setTo public=\"1\" set=\"method\" line=\"35\"><f a=\"x:y:width:height\">\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setTo>\n\t<set_renderContext public=\"1\" set=\"method\" line=\"42\"><f a=\"value\">\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n</f></set_renderContext>\n\t<get_renderContext public=\"1\" set=\"method\" line=\"47\"><f a=\"\"><c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/></f></get_renderContext>\n\t<new public=\"1\" set=\"method\" line=\"20\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+etaminstudio_core_view_AppRootView.__rtti = "<class path=\"etaminstudio.core.view.AppRootView\" params=\"\">\n\t<extends path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\"/>\n\t<onReadySgnl public=\"1\"><c path=\"msignal.Signal0\"/></onReadySgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"28\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onAddedToStage set=\"method\" line=\"33\"><f a=\"e\">\n\t<c path=\"openfl.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></_onAddedToStage>\n\t<start public=\"1\" set=\"method\" line=\"44\"><f a=\"assets\">\n\t<c path=\"starling.utils.AssetManager\"/>\n\t<x path=\"Void\"/>\n</f></start>\n\t<new public=\"1\" set=\"method\" line=\"19\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta><m n=\":directlyUsed\"/></meta>\n</class>";
 etaminstudio_core_view_NavigatorMediator.__meta__ = { fields : { view : { inject : null}, sectionChangingSgnl : { inject : null}, sectionChangedSgnl : { inject : null}}};
 etaminstudio_core_view_NavigatorMediator.__rtti = "<class path=\"etaminstudio.core.view.NavigatorMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"etaminstudio.core.view.Navigator\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<sectionChangingSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangingSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangingSgnl>\n\t<sectionChangedSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangedSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangedSgnl>\n\t<_isRegistred expr=\"false\" line=\"28\">\n\t\t<x path=\"Bool\"/>\n\t\t<meta><m n=\":value\"><e>false</e></m></meta>\n\t</_isRegistred>\n\t<_transition><c path=\"String\"/></_transition>\n\t<_transitionType><c path=\"String\"/></_transitionType>\n\t<_duration><x path=\"Float\"/></_duration>\n\t<_mask><c path=\"starling.display.Sprite\"/></_mask>\n\t<initialize public=\"1\" set=\"method\" line=\"41\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onResize set=\"method\" line=\"53\"><f a=\"e\">\n\t<c path=\"starling.events.ResizeEvent\"/>\n\t<x path=\"Void\"/>\n</f></_onResize>\n\t<changeSection public=\"1\" set=\"method\" line=\"58\"><f a=\"newSection\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></changeSection>\n\t<setSection public=\"1\" set=\"method\" line=\"67\"><f a=\"sectionName:data:transitionType:duration\">\n\t<c path=\"String\"/>\n\t<c path=\"etaminstudio.core.definitions.ViewVO\"/>\n\t<c path=\"String\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setSection>\n\t<transition public=\"1\" set=\"method\" line=\"113\">\n\t\t<f a=\"?delay\" v=\"50\">\n\t\t\t<x path=\"Int\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:50}</e></m></meta>\n\t</transition>\n\t<dispose public=\"1\" set=\"method\" line=\"167\"><f a=\"\"><x path=\"Void\"/></f></dispose>\n\t<new public=\"1\" set=\"method\" line=\"36\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 haxe_Serializer.USE_CACHE = false;
@@ -59141,7 +59143,6 @@ robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingCollection.__r
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializer.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingInitializer\" params=\"\">\n\t<extends path=\"robotlegs.bender.extensions.display.base.impl.BaseInitializer\"/>\n\t<multitouchEnabled public=\"1\" expr=\"true\" line=\"20\" static=\"1\">\n\t\t<x path=\"Bool\"/>\n\t\t<meta><m n=\":value\"><e>true</e></m></meta>\n\t</multitouchEnabled>\n\t<addLayer public=\"1\" set=\"method\" line=\"27\" override=\"1\"><f a=\"ViewClass:index:id\">\n\t<x path=\"Class\"><d/></x>\n\t<x path=\"Int\"/>\n\t<c path=\"String\"/>\n\t<x path=\"Void\"/>\n</f></addLayer>\n\t<new public=\"1\" set=\"method\" line=\"22\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializer.multitouchEnabled = true;
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingInitializerAvailable.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingInitializerAvailable\" params=\"\">\n\t<new public=\"1\" set=\"method\" line=\"12\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
-robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\" params=\"\">\n\t<extends path=\"starling.display.Sprite\"/>\n\t<implements path=\"robotlegs.bender.extensions.display.base.api.ILayer\"/>\n\t<starling><c path=\"starling.core.Starling\"/></starling>\n\t<renderContext public=\"1\" get=\"accessor\" set=\"accessor\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t\t<meta><m n=\":isVar\"/></meta>\n\t</renderContext>\n\t<process public=\"1\" set=\"method\" line=\"25\"><f a=\"\"><x path=\"Void\"/></f></process>\n\t<setStarling public=\"1\" set=\"method\" line=\"30\"><f a=\"starling\">\n\t<c path=\"starling.core.Starling\"/>\n\t<x path=\"Void\"/>\n</f></setStarling>\n\t<setTo public=\"1\" set=\"method\" line=\"35\"><f a=\"x:y:width:height\">\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setTo>\n\t<set_renderContext public=\"1\" set=\"method\" line=\"42\"><f a=\"value\">\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n</f></set_renderContext>\n\t<get_renderContext public=\"1\" set=\"method\" line=\"47\"><f a=\"\"><c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/></f></get_renderContext>\n\t<new public=\"1\" set=\"method\" line=\"20\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingViewMap.__meta__ = { fields : { starlingCollection : { inject : null}, mediatorMap : { inject : null}, init : { postConstruct : null}}};
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingViewMap.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingViewMap\" params=\"\">\n\t<implements path=\"robotlegs.bender.extensions.display.stage3D.starling.api.IStarlingViewMap\"/>\n\t<starlingCollection public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingCollection\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</starlingCollection>\n\t<mediatorMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.mediatorMap.api.IMediatorMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</mediatorMap>\n\t<init public=\"1\" set=\"method\" line=\"40\">\n\t\t<f a=\"\"><x path=\"Void\"/></f>\n\t\t<meta><m n=\"postConstruct\"/></meta>\n\t</init>\n\t<addStarlingView public=\"1\" set=\"method\" line=\"60\"><f a=\"view\">\n\t<c path=\"starling.display.DisplayObject\"/>\n\t<x path=\"Void\"/>\n</f></addStarlingView>\n\t<mediateChildren set=\"method\" line=\"65\">\n\t\t<f a=\"view\">\n\t\t\t<c path=\"starling.display.DisplayObject\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":has_untyped\"/></meta>\n\t</mediateChildren>\n\t<removeStarlingView public=\"1\" set=\"method\" line=\"78\"><f a=\"view\">\n\t<c path=\"starling.display.DisplayObject\"/>\n\t<x path=\"Void\"/>\n</f></removeStarlingView>\n\t<unmediateChildren set=\"method\" line=\"83\">\n\t\t<f a=\"view\">\n\t\t\t<c path=\"starling.display.DisplayObject\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":has_untyped\"/></meta>\n\t</unmediateChildren>\n\t<onStarlingAdded set=\"method\" line=\"104\"><f a=\"event\">\n\t<c path=\"starling.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></onStarlingAdded>\n\t<onStarlingRemoved set=\"method\" line=\"114\"><f a=\"event\">\n\t<c path=\"starling.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></onStarlingRemoved>\n\t<onRootCreated set=\"method\" line=\"125\"><f a=\"event\">\n\t<c path=\"starling.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></onRootCreated>\n\t<new public=\"1\" set=\"method\" line=\"34\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_extensions_display_webGL_threejs_impl_ThreeJsInitializerAvailable.__rtti = "<class path=\"robotlegs.bender.extensions.display.webGL.threejs.impl.ThreeJsInitializerAvailable\" params=\"\">\n\t<new public=\"1\" set=\"method\" line=\"12\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";

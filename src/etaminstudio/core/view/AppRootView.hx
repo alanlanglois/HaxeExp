@@ -2,6 +2,7 @@ package etaminstudio.core.view;
 
 import msignal.Signal;
 import openfl.events.Event;
+import robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer;
 import starling.display.Quad;
 import starling.display.Sprite;
 import starling.utils.AssetManager;
@@ -10,7 +11,7 @@ import starling.utils.AssetManager;
  * ...
  * @author Alan Langlois - Etamin Studio
  */
-class AppRootView extends Sprite
+class AppRootView extends StarlingLayer
 {
 
 	public var onReadySgnl:Signal0;
