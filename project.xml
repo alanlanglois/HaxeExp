@@ -15,11 +15,11 @@
 	<!-- classpath, haxe libs -->
 	<source path="src" />
 	<haxelib name="openfl" />
-	<haxelib name="starling" />
 	<haxelib name="actuate" />
 	<haxelib name="robotlegs" />
 	<haxelib name="swiftsuspenders" />
 	<haxelib name="msignal" />
+	<haxelib name="starling" />
 	<haxeflag name="--macro" value="include('com.etamin.first.view')" />
 	
 	<app swf-version="17"/>

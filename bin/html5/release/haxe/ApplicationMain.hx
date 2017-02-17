@@ -28,7 +28,7 @@ import DefaultAssetLibrary;
 		
 		config = {
 			
-			build: "1",
+			build: "2",
 			company: "Alan Langlois - Etamin Studio",
 			file: "First",
 			fps: 60,
@@ -64,7 +64,7 @@ import DefaultAssetLibrary;
 			
 		};
 		
-		#if hxtelemetry
+		#if (hxtelemetry && !macro)
 		var telemetry = new hxtelemetry.HxTelemetry.Config ();
 		telemetry.allocations = true;
 		telemetry.host = "localhost";

@@ -13,7 +13,7 @@ var ApplicationMain = function() { };
 $hxClasses["ApplicationMain"] = ApplicationMain;
 ApplicationMain.__name__ = ["ApplicationMain"];
 ApplicationMain.main = function() {
-	ApplicationMain.config = { build : "1", company : "Alan Langlois - Etamin Studio", file : "First", fps : 60, name : "First", orientation : "", packageName : "com.etamin.first.First", version : "1.0.0", windows : [{ allowHighDPI : false, antialiasing : 0, background : 16777215, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : true, height : 640, hidden : null, maximized : null, minimized : null, parameters : "{}", resizable : true, stencilBuffer : true, title : "First", vsync : false, width : 800, x : null, y : null}]};
+	ApplicationMain.config = { build : "2", company : "Alan Langlois - Etamin Studio", file : "First", fps : 60, name : "First", orientation : "", packageName : "com.etamin.first.First", version : "1.0.0", windows : [{ allowHighDPI : false, antialiasing : 0, background : 16777215, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : true, height : 640, hidden : null, maximized : null, minimized : null, parameters : "{}", resizable : true, stencilBuffer : true, title : "First", vsync : false, width : 800, x : null, y : null}]};
 };
 ApplicationMain.create = function() {
 	var app = new openfl_display_Application();
@@ -474,7 +474,7 @@ openfl_display_DisplayObject.prototype = $extend(openfl_events_EventDispatcher.p
 	,__renderCairoMask: function(renderSession) {
 	}
 	,__renderCanvas: function(renderSession) {
-		openfl__$internal_renderer_canvas_CanvasDisplayObject.render(this,renderSession);
+		if(this.get_mask() == null || this.get_mask().get_width() > 0 && this.get_mask().get_height() > 0) openfl__$internal_renderer_canvas_CanvasDisplayObject.render(this,renderSession);
 	}
 	,__renderCanvasMask: function(renderSession) {
 		if(this.__graphics != null) openfl__$internal_renderer_canvas_CanvasGraphics.renderMask(this.__graphics,renderSession);
@@ -1172,7 +1172,7 @@ openfl_display_DisplayObjectContainer.prototype = $extend(openfl_display_Interac
 	,__renderCairoMask: function(renderSession) {
 	}
 	,__renderCanvas: function(renderSession) {
-		if(!this.__renderable || this.__worldAlpha <= 0) return;
+		if(!this.__renderable || this.__worldAlpha <= 0 || this.get_mask() != null && (this.get_mask().get_width() <= 0 || this.get_mask().get_height() <= 0)) return;
 		openfl_display_InteractiveObject.prototype.__renderCanvas.call(this,renderSession);
 		renderSession.maskManager.pushObject(this);
 		var _g = 0;
@@ -1353,36 +1353,15 @@ com_etamin_first_Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		starling_core_Starling.set_multitouchEnabled(true);
 		starling_core_Starling.set_handleLostContext(true);
 		starling_textures_RenderTexture.optimizePersistentBuffers = true;
-		this.mStarling = new starling_core_Starling(etaminstudio_core_view_AppRootView,this.stage,null,null,0,"auto");
-		this.mStarling.get_stage().set_stageWidth(800);
-		this.mStarling.get_stage().set_stageHeight(640);
-		this.mStarling.set_simulateMultitouch(true);
-		this.mStarling.set_enableErrorChecking(openfl_system_Capabilities.isDebugger);
-		this.mStarling.addEventListener("rootCreated",$bind(this,this._onRootCreated));
-		this.mContext = new robotlegs_bender_framework_impl_Context();
-		this.mContext.install([robotlegs_bender_bundles_mvcs_MVCSBundle,robotlegs_bender_bundles_stage3D_Stage3DBundle,robotlegs_bender_bundles_stage3D_StarlingBundle]);
-		this.mContext.configure([com_etamin_first_AppConfig,this,this.mStarling]);
-		this.mContext.configure(new robotlegs_bender_extensions_contextView_ContextView(this));
-		this.mContext.initialize();
+		this.mContext = new robotlegs_bender_framework_impl_Context().install([robotlegs_bender_bundles_mvcs_MVCSBundle,robotlegs_bender_bundles_stage3D_Stage3DBundle,robotlegs_bender_bundles_stage3D_StarlingBundle]).configure(com_etamin_first_AppConfig).configure(new robotlegs_bender_extensions_contextView_ContextView(this));
 		this.stage.addEventListener("resize",$bind(this,this.onResize),false,2147483647,true);
-		this.mStarling.start();
+	}
+	,_on3DContectCreated: function(e) {
 	}
 	,_onRootCreated: function(e) {
-		var assetManager = new starling_utils_AssetManager(etaminstudio_core_definitions_AppConstants.starlingRatio,false);
-		assetManager.set_verbose(true);
-		(js_Boot.__cast(this.mStarling.get_root() , etaminstudio_core_view_AppRootView)).start(assetManager);
 	}
 	,onResize: function(e) {
-		haxe_Log.trace("+++> " + this.stage.stageWidth + "x" + this.stage.stageHeight,{ fileName : "Main.hx", lineNumber : 108, className : "com.etamin.first.Main", methodName : "onResize"});
-		var viewPort = new openfl_geom_Rectangle(0,0,800,640);
-		try {
-			this.mStarling.set_viewPort(viewPort);
-		} catch( error ) {
-			haxe_CallStack.lastException = error;
-			if (error instanceof js__$Boot_HaxeError) error = error.val;
-			if( js_Boot.__instanceof(error,openfl_errors_Error) ) {
-			} else throw(error);
-		}
+		haxe_Log.trace("+++> " + this.stage.stageWidth + "x" + this.stage.stageHeight,{ fileName : "Main.hx", lineNumber : 116, className : "com.etamin.first.Main", methodName : "onResize"});
 	}
 	,__class__: com_etamin_first_Main
 });
@@ -1473,7 +1452,11 @@ lime_utils_AssetLibrary.prototype = {
 		if(this.cachedAudioBuffers.exists(id)) return this.cachedAudioBuffers.get(id); else if(this.classTypes.exists(id)) return lime_media_AudioBuffer.fromBytes(js_Boot.__cast(Type.createInstance(this.classTypes.get(id),[]) , haxe_io_Bytes)); else return lime_media_AudioBuffer.fromFile(this.paths.get(id));
 	}
 	,getBytes: function(id) {
-		if(this.cachedBytes.exists(id)) return this.cachedBytes.get(id); else if(this.classTypes.exists(id)) return js_Boot.__cast(Type.createInstance(this.classTypes.get(id),[]) , haxe_io_Bytes); else return lime_utils__$Bytes_Bytes_$Impl_$.fromFile(this.paths.get(id));
+		if(this.cachedBytes.exists(id)) return this.cachedBytes.get(id); else if(this.cachedText.exists(id)) {
+			var bytes = lime_utils__$Bytes_Bytes_$Impl_$.ofString(this.cachedText.get(id));
+			this.cachedBytes.set(id,bytes);
+			return bytes;
+		} else if(this.classTypes.exists(id)) return js_Boot.__cast(Type.createInstance(this.classTypes.get(id),[]) , haxe_io_Bytes); else return lime_utils__$Bytes_Bytes_$Impl_$.fromFile(this.paths.get(id));
 	}
 	,getFont: function(id) {
 		if(this.cachedFonts.exists(id)) return this.cachedFonts.get(id); else if(this.classTypes.exists(id)) return js_Boot.__cast(Type.createInstance(this.classTypes.get(id),[]) , lime_text_Font); else return lime_text_Font.fromFile(this.paths.get(id));
@@ -1542,6 +1525,7 @@ lime_utils_AssetLibrary.prototype = {
 			var $it0 = this.preload.keys();
 			while( $it0.hasNext() ) {
 				var id = $it0.next();
+				lime_utils_Log.verbose("Preloading asset: " + id,{ fileName : "AssetLibrary.hx", lineNumber : 400, className : "lime.utils.AssetLibrary", methodName : "load"});
 				var _g = this.types.get(id);
 				if(_g != null) switch(_g) {
 				case "BINARY":
@@ -1681,6 +1665,7 @@ lime_utils_AssetLibrary.prototype = {
 	}
 	,__assetLoaded: function(id) {
 		this.assetsLoaded++;
+		if(id != null) lime_utils_Log.verbose("Loaded asset: " + id + " [" + (this.assetsLoaded - 1) + "/" + (this.assetsTotal - 1) + "]",{ fileName : "AssetLibrary.hx", lineNumber : 608, className : "lime.utils.AssetLibrary", methodName : "__assetLoaded"});
 		if(id != null) {
 			var size = this.sizes.get(id);
 			if(!this.bytesLoadedCache.exists(id)) this.bytesLoaded += size; else {
@@ -1837,6 +1822,11 @@ EReg.prototype = {
 	}
 	,matched: function(n) {
 		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw new js__$Boot_HaxeError("EReg::matched");
+	}
+	,matchedRight: function() {
+		if(this.r.m == null) throw new js__$Boot_HaxeError("No string matched");
+		var sz = this.r.m.index + this.r.m[0].length;
+		return HxOverrides.substr(this.r.s,sz,this.r.s.length - sz);
 	}
 	,matchedPos: function() {
 		if(this.r.m == null) throw new js__$Boot_HaxeError("No string matched");
@@ -2103,6 +2093,10 @@ StringTools.urlEncode = function(s) {
 };
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
+};
+StringTools.htmlEscape = function(s,quotes) {
+	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+	if(quotes) return s.split("\"").join("&quot;").split("'").join("&#039;"); else return s;
 };
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
@@ -2444,22 +2438,45 @@ com_etamin_first_AppConfig.__name__ = ["com","etamin","first","AppConfig"];
 com_etamin_first_AppConfig.__interfaces__ = [robotlegs_bender_framework_api_IConfig];
 com_etamin_first_AppConfig.prototype = {
 	context: null
+	,contextView: null
 	,commandMap: null
 	,mediatorMap: null
+	,injector: null
 	,stack: null
+	,rendererContext: null
 	,renderer: null
-	,contextView: null
 	,configure: function() {
-		this.context.afterInitializing($bind(this,this._init));
 		this.context.set_logLevel(robotlegs_bender_framework_api_LogLevel.DEBUG);
-		this.commandMap.map(etaminstudio_core_signals_config_StartupSgnl).toCommand(com_etamin_first_commands_StartupCmd);
-		this.mediatorMap.map(etaminstudio_core_view_AppRootView).toMediator(etaminstudio_core_view_AppRootMediator);
-		this.mediatorMap.map(etaminstudio_core_view_Navigator).toMediator(etaminstudio_core_view_NavigatorMediator);
-		haxe_Log.trace("++++ APPConfig",{ fileName : "AppConfig.hx", lineNumber : 63, className : "com.etamin.first.AppConfig", methodName : "configure"});
-		this.contextView.view.addChild(new openfl_display_Sprite());
+		this.context.afterInitializing($bind(this,this._init));
 	}
 	,_init: function() {
-		haxe_Log.trace("+++ APP READY ",{ fileName : "AppConfig.hx", lineNumber : 71, className : "com.etamin.first.AppConfig", methodName : "_init"});
+		this.rendererContext.onReady.addOnce($bind(this,this.OnContext3DReady));
+		this.rendererContext.setup(2);
+	}
+	,OnContext3DReady: function() {
+		this.mapMediators();
+		this.initView();
+		this.renderer.start();
+	}
+	,mapMediators: function() {
+		this.commandMap.map(robotlegs_bender_extensions_signalCommandMap_impl_signals_AppSetupCompleteSignal).toCommand(com_etamin_first_commands_ExampleCommand);
+		this.commandMap.map(etaminstudio_core_signals_config_StartupSgnl).toCommand(com_etamin_first_commands_StartupCmd);
+		this.commandMap.map(etaminstudio_core_signals_section_ChangeSectionSgnl).toCommand(etaminstudio_core_commands_ChangeSectionCmd);
+		this.commandMap.map(etaminstudio_core_signals_section_SectionChangedSgnl).toCommand(etaminstudio_core_commands_SectionChangedCmd);
+		this.injector.map(etaminstudio_core_model_NavigatorModel).asSingleton();
+		this.injector.map(com_etamin_first_model_AppModel).asSingleton();
+		this.injector.map(etaminstudio_core_signals_section_SectionChangingSgnl).asSingleton();
+		this.injector.map(etaminstudio_core_signals_data_DirectChangeDataSgnl).asSingleton();
+		this.mediatorMap.map(etaminstudio_core_view_AppRootView).toMediator(etaminstudio_core_view_AppRootMediator);
+		this.mediatorMap.map(etaminstudio_core_view_Navigator).toMediator(etaminstudio_core_view_NavigatorMediator);
+		this.mediatorMap.map(com_etamin_first_view_home_HomeView).toMediator(com_etamin_first_view_home_HomeMediator);
+		this.mediatorMap.map(com_etamin_first_view_second_SecondView).toMediator(com_etamin_first_view_second_SecondMediator);
+		this.injector.map(etaminstudio_core_services_data_ILoadDataService).toSingleton(com_etamin_first_services_data_LoadDataService);
+		haxe_Log.trace("++++ APPConfig",{ fileName : "AppConfig.hx", lineNumber : 112, className : "com.etamin.first.AppConfig", methodName : "mapMediators"});
+		haxe_Log.trace("+++ APP READY",{ fileName : "AppConfig.hx", lineNumber : 113, className : "com.etamin.first.AppConfig", methodName : "mapMediators"});
+	}
+	,initView: function() {
+		this.stack.addLayer(etaminstudio_core_view_AppRootView);
 	}
 	,__class__: com_etamin_first_AppConfig
 };
@@ -2479,6 +2496,19 @@ robotlegs_bender_bundles_mvcs_Command.prototype = {
 	}
 	,__class__: robotlegs_bender_bundles_mvcs_Command
 };
+var com_etamin_first_commands_ExampleCommand = function() {
+};
+$hxClasses["com.etamin.first.commands.ExampleCommand"] = com_etamin_first_commands_ExampleCommand;
+com_etamin_first_commands_ExampleCommand.__name__ = ["com","etamin","first","commands","ExampleCommand"];
+com_etamin_first_commands_ExampleCommand.__super__ = robotlegs_bender_bundles_mvcs_Command;
+com_etamin_first_commands_ExampleCommand.prototype = $extend(robotlegs_bender_bundles_mvcs_Command.prototype,{
+	execute: function() {
+		haxe_Log.trace("->>>>>>",{ fileName : "ExampleCommand.hx", lineNumber : 18, className : "com.etamin.first.commands.ExampleCommand", methodName : "execute"});
+		haxe_Log.trace("SETUP READY",{ fileName : "ExampleCommand.hx", lineNumber : 19, className : "com.etamin.first.commands.ExampleCommand", methodName : "execute"});
+		haxe_Log.trace("->>>>>>",{ fileName : "ExampleCommand.hx", lineNumber : 20, className : "com.etamin.first.commands.ExampleCommand", methodName : "execute"});
+	}
+	,__class__: com_etamin_first_commands_ExampleCommand
+});
 var com_etamin_first_commands_StartupCmd = function() {
 };
 $hxClasses["com.etamin.first.commands.StartupCmd"] = com_etamin_first_commands_StartupCmd;
@@ -2502,7 +2532,7 @@ com_etamin_first_model_AppModel.prototype = {
 	,directChangeDataSgnl: null
 	,loadSetup: function() {
 		haxe_Log.trace("loadSetup :: ",{ fileName : "AppModel.hx", lineNumber : 32, className : "com.etamin.first.model.AppModel", methodName : "loadSetup"});
-		this.changeSection(new etaminstudio_core_definitions_SectionVO("com.etamin.first.view",new etaminstudio_core_definitions_ViewVO(),false,false,"Alpha",1,null));
+		this.changeSection(new etaminstudio_core_definitions_SectionVO("com.etamin.first.view.home.HomeView",new etaminstudio_core_definitions_ViewVO(),false,false,"Alpha",1,null));
 	}
 	,changeSection: function(sectionVO,delay) {
 		if(delay == null) delay = 0;
@@ -2513,6 +2543,32 @@ com_etamin_first_model_AppModel.prototype = {
 		this.changeSectionSgnl.dispatch(sectionVO);
 	}
 	,__class__: com_etamin_first_model_AppModel
+};
+var etaminstudio_core_services_data_ILoadDataService = function() { };
+$hxClasses["etaminstudio.core.services.data.ILoadDataService"] = etaminstudio_core_services_data_ILoadDataService;
+etaminstudio_core_services_data_ILoadDataService.__name__ = ["etaminstudio","core","services","data","ILoadDataService"];
+etaminstudio_core_services_data_ILoadDataService.prototype = {
+	getData: null
+	,__class__: etaminstudio_core_services_data_ILoadDataService
+};
+var com_etamin_first_services_data_LoadDataService = function() {
+};
+$hxClasses["com.etamin.first.services.data.LoadDataService"] = com_etamin_first_services_data_LoadDataService;
+com_etamin_first_services_data_LoadDataService.__name__ = ["com","etamin","first","services","data","LoadDataService"];
+com_etamin_first_services_data_LoadDataService.__interfaces__ = [etaminstudio_core_services_data_ILoadDataService];
+com_etamin_first_services_data_LoadDataService.prototype = {
+	_sectionVO: null
+	,navigatorModel: null
+	,appModel: null
+	,getData: function(sectionVO,delay) {
+		if(delay == null) delay = 0;
+		this._sectionVO = sectionVO;
+		this.changeSection(this._sectionVO);
+	}
+	,changeSection: function(sectionVO) {
+		this.navigatorModel.changeSection(sectionVO);
+	}
+	,__class__: com_etamin_first_services_data_LoadDataService
 };
 var robotlegs_bender_extensions_mediatorMap_api_IMediator = function() { };
 $hxClasses["robotlegs.bender.extensions.mediatorMap.api.IMediator"] = robotlegs_bender_extensions_mediatorMap_api_IMediator;
@@ -2561,6 +2617,17 @@ com_etamin_first_view_home_HomeMediator.__name__ = ["com","etamin","first","view
 com_etamin_first_view_home_HomeMediator.__super__ = robotlegs_bender_bundles_mvcs_Mediator;
 com_etamin_first_view_home_HomeMediator.prototype = $extend(robotlegs_bender_bundles_mvcs_Mediator.prototype,{
 	view: null
+	,changeSectionSgnl: null
+	,initialize: function() {
+		haxe_Log.trace("++++ H O M E   M E D I A T O R +++++",{ fileName : "HomeMediator.hx", lineNumber : 29, className : "com.etamin.first.view.home.HomeMediator", methodName : "initialize"});
+		robotlegs_bender_bundles_mvcs_Mediator.prototype.initialize.call(this);
+		this.view.onTouchCB = $bind(this,this.onTouchCB);
+		this.view.initialize();
+	}
+	,onTouchCB: function() {
+		this.changeSectionSgnl.dispatch(new etaminstudio_core_definitions_SectionVO("com.etamin.first.view.second.SecondView",new etaminstudio_core_definitions_ViewVO(),false,false,"MoveToTheLeft",0.5));
+		haxe_Log.trace("TEST TEST TEST",{ fileName : "HomeMediator.hx", lineNumber : 41, className : "com.etamin.first.view.home.HomeMediator", methodName : "onTouchCB"});
+	}
 	,__class__: com_etamin_first_view_home_HomeMediator
 });
 var starling_events_EventDispatcher = function() {
@@ -3347,7 +3414,7 @@ openfl_geom_Matrix.prototype = {
 	,__class__: openfl_geom_Matrix
 };
 var openfl_geom_Matrix3D = function(v) {
-	if(v != null && v.get_length() == 16) this.rawData = v; else {
+	if(v != null && v.get_length() == 16) this.rawData = v.concat(null); else {
 		var a = [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0];
 		var vector = openfl__$Vector_Vector_$Impl_$.toFloatVector(null);
 		var _g1 = 0;
@@ -5596,11 +5663,8 @@ etaminstudio_core_view_SectionView.prototype = $extend(starling_display_Sprite.p
 		this.stageH = this.get_stage().get_stageHeight();
 		this.ratioH = etaminstudio_core_definitions_AppConstants.ratioH;
 		this.ratioV = etaminstudio_core_definitions_AppConstants.ratioV;
-		if(this.transition != null) (function(f,a1) {
-			return function() {
-				f(a1);
-			};
-		})(this.transition,0);
+		haxe_Log.trace("INITIALIZED :: " + Std.string(this.transition),{ fileName : "SectionView.hx", lineNumber : 74, className : "etaminstudio.core.view.SectionView", methodName : "initialize"});
+		if(this.transition != null) this.transition(0);
 	}
 	,setOrientation: function(orientation) {
 	}
@@ -5633,17 +5697,99 @@ etaminstudio_core_view_SectionView.prototype = $extend(starling_display_Sprite.p
 });
 var com_etamin_first_view_home_HomeView = function(assets) {
 	etaminstudio_core_view_SectionView.call(this,assets);
-	var quad = new starling_display_Quad(100,100,2228326);
-	quad.set_x(50);
-	quad.set_y(50);
-	this.addChild(quad);
+	haxe_Log.trace("H O M E   V I E W !!!",{ fileName : "HomeView.hx", lineNumber : 24, className : "com.etamin.first.view.home.HomeView", methodName : "new"});
+	this.addEventListener("addedToStage",$bind(this,this._onStage));
 };
 $hxClasses["com.etamin.first.view.home.HomeView"] = com_etamin_first_view_home_HomeView;
 com_etamin_first_view_home_HomeView.__name__ = ["com","etamin","first","view","home","HomeView"];
 com_etamin_first_view_home_HomeView.__super__ = etaminstudio_core_view_SectionView;
 com_etamin_first_view_home_HomeView.prototype = $extend(etaminstudio_core_view_SectionView.prototype,{
-	__class__: com_etamin_first_view_home_HomeView
+	onTouchCB: null
+	,_onStage: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this._onStage));
+		haxe_Log.trace("ON STAGE",{ fileName : "HomeView.hx", lineNumber : 34, className : "com.etamin.first.view.home.HomeView", methodName : "_onStage"});
+		var quad = new starling_display_Quad(this.stageW,this.stageH,16776960);
+		quad.set_x(0);
+		quad.set_y(0);
+		this.addChild(quad);
+		this.addEventListener("touch",$bind(this,this._onTouch));
+	}
+	,_onTouch: function(e) {
+		if(e.getTouch(this,"ended") != null) {
+			haxe_Log.trace("+++ ON TOUCH",{ fileName : "HomeView.hx", lineNumber : 50, className : "com.etamin.first.view.home.HomeView", methodName : "_onTouch"});
+			this.onTouchCB();
+		}
+	}
+	,__class__: com_etamin_first_view_home_HomeView
 });
+var com_etamin_first_view_second_SecondMediator = function() {
+};
+$hxClasses["com.etamin.first.view.second.SecondMediator"] = com_etamin_first_view_second_SecondMediator;
+com_etamin_first_view_second_SecondMediator.__name__ = ["com","etamin","first","view","second","SecondMediator"];
+com_etamin_first_view_second_SecondMediator.__super__ = robotlegs_bender_bundles_mvcs_Mediator;
+com_etamin_first_view_second_SecondMediator.prototype = $extend(robotlegs_bender_bundles_mvcs_Mediator.prototype,{
+	view: null
+	,initialize: function() {
+		haxe_Log.trace("++++ H O M E   M E D I A T O R +++++",{ fileName : "SecondMediator.hx", lineNumber : 24, className : "com.etamin.first.view.second.SecondMediator", methodName : "initialize"});
+		robotlegs_bender_bundles_mvcs_Mediator.prototype.initialize.call(this);
+		this.view.initialize();
+	}
+	,__class__: com_etamin_first_view_second_SecondMediator
+});
+var com_etamin_first_view_second_SecondView = function(assets) {
+	etaminstudio_core_view_SectionView.call(this,assets);
+	haxe_Log.trace("H O M E   V I E W !!!",{ fileName : "SecondView.hx", lineNumber : 18, className : "com.etamin.first.view.second.SecondView", methodName : "new"});
+	this.addEventListener("addedToStage",$bind(this,this._onStage));
+};
+$hxClasses["com.etamin.first.view.second.SecondView"] = com_etamin_first_view_second_SecondView;
+com_etamin_first_view_second_SecondView.__name__ = ["com","etamin","first","view","second","SecondView"];
+com_etamin_first_view_second_SecondView.__super__ = etaminstudio_core_view_SectionView;
+com_etamin_first_view_second_SecondView.prototype = $extend(etaminstudio_core_view_SectionView.prototype,{
+	_onStage: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this._onStage));
+		haxe_Log.trace("ON STAGE",{ fileName : "SecondView.hx", lineNumber : 28, className : "com.etamin.first.view.second.SecondView", methodName : "_onStage"});
+		var quad = new starling_display_Quad(this.stageW,this.stageH,16711680);
+		quad.set_x(0);
+		quad.set_y(0);
+		this.addChild(quad);
+	}
+	,__class__: com_etamin_first_view_second_SecondView
+});
+var etaminstudio_core_commands_ChangeSectionCmd = function() { };
+$hxClasses["etaminstudio.core.commands.ChangeSectionCmd"] = etaminstudio_core_commands_ChangeSectionCmd;
+etaminstudio_core_commands_ChangeSectionCmd.__name__ = ["etaminstudio","core","commands","ChangeSectionCmd"];
+etaminstudio_core_commands_ChangeSectionCmd.prototype = {
+	sectionVO: null
+	,sectionEngineModel: null
+	,dataService: null
+	,execute: function() {
+		haxe_Log.trace("----------------------------------------------",{ fileName : "ChangeSectionCmd.hx", lineNumber : 27, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+		haxe_Log.trace("---->sectionName:" + this.sectionVO.sectionName,{ fileName : "ChangeSectionCmd.hx", lineNumber : 28, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+		haxe_Log.trace("----------------------------------------------",{ fileName : "ChangeSectionCmd.hx", lineNumber : 29, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+		if(!this.sectionEngineModel.isSectionChanging) {
+			if(this.sectionEngineModel.currentSection == null) {
+				haxe_Log.trace("sectionVO.sectionName:" + this.sectionVO.sectionName,{ fileName : "ChangeSectionCmd.hx", lineNumber : 36, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+				this.dataService.getData(this.sectionVO);
+			} else if(this.sectionVO.sectionName != null) {
+				if(this.sectionEngineModel.currentSection.sectionName != this.sectionVO.sectionName || this.sectionVO.canBeMultiple) {
+					this.sectionEngineModel.isSectionChanging = true;
+					this.dataService.getData(this.sectionVO);
+				} else haxe_Log.trace("This section is already displayed",{ fileName : "ChangeSectionCmd.hx", lineNumber : 50, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+			} else haxe_Log.trace("ClassRef param is null, impossible to load the section",{ fileName : "ChangeSectionCmd.hx", lineNumber : 55, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+		} else haxe_Log.trace("Is already changing...",{ fileName : "ChangeSectionCmd.hx", lineNumber : 60, className : "etaminstudio.core.commands.ChangeSectionCmd", methodName : "execute"});
+	}
+	,__class__: etaminstudio_core_commands_ChangeSectionCmd
+};
+var etaminstudio_core_commands_SectionChangedCmd = function() { };
+$hxClasses["etaminstudio.core.commands.SectionChangedCmd"] = etaminstudio_core_commands_SectionChangedCmd;
+etaminstudio_core_commands_SectionChangedCmd.__name__ = ["etaminstudio","core","commands","SectionChangedCmd"];
+etaminstudio_core_commands_SectionChangedCmd.prototype = {
+	sectionEngineModel: null
+	,execute: function() {
+		this.sectionEngineModel.isSectionChanging = false;
+	}
+	,__class__: etaminstudio_core_commands_SectionChangedCmd
+};
 var etaminstudio_core_definitions_AppConstants = function() { };
 $hxClasses["etaminstudio.core.definitions.AppConstants"] = etaminstudio_core_definitions_AppConstants;
 etaminstudio_core_definitions_AppConstants.__name__ = ["etaminstudio","core","definitions","AppConstants"];
@@ -5706,6 +5852,42 @@ etaminstudio_core_definitions_ViewVO.prototype = {
 	,language: null
 	,initPos: null
 	,__class__: etaminstudio_core_definitions_ViewVO
+};
+var etaminstudio_core_model_NavigatorModel = function() {
+	this.isSectionChanging = false;
+	this.historyVec = [];
+};
+$hxClasses["etaminstudio.core.model.NavigatorModel"] = etaminstudio_core_model_NavigatorModel;
+etaminstudio_core_model_NavigatorModel.__name__ = ["etaminstudio","core","model","NavigatorModel"];
+etaminstudio_core_model_NavigatorModel.prototype = {
+	sectionChangingSgnl: null
+	,currentSection: null
+	,isSectionChanging: null
+	,historyVec: null
+	,addToHistory: function(sectionVO) {
+		this.historyVec.push(sectionVO);
+	}
+	,removeFromHistory: function() {
+		if(this.historyVec.length > 1) this.historyVec.pop();
+	}
+	,changeSection: function(currentSection) {
+		haxe_Log.trace("[MODEL]>>changeSection::" + currentSection.sectionName,{ fileName : "NavigatorModel.hx", lineNumber : 46, className : "etaminstudio.core.model.NavigatorModel", methodName : "changeSection"});
+		this.isSectionChanging = true;
+		this.currentSection = currentSection;
+		this.sectionChangingSgnl.dispatch(currentSection);
+	}
+	,backInHistory: function(isBackHome) {
+	}
+	,updateHistoryElementData: function(idElement,field,data) {
+		if(this.historyVec.length > 0) {
+		}
+	}
+	,updateHistoryElementConfig: function(idElement,field,data) {
+		if(this.historyVec.length > 0) {
+			var sectionVO = this.historyVec[idElement];
+		}
+	}
+	,__class__: etaminstudio_core_model_NavigatorModel
 };
 var msignal_Signal = function(valueClasses) {
 	if(valueClasses == null) valueClasses = [];
@@ -5869,11 +6051,12 @@ etaminstudio_core_view_AppRootMediator.prototype = $extend(robotlegs_bender_bund
 	,startupSgnl: null
 	,initialize: function() {
 		haxe_Log.trace("+++++++++++++++++++++++++++++",{ fileName : "AppRootMediator.hx", lineNumber : 25, className : "etaminstudio.core.view.AppRootMediator", methodName : "initialize"});
+		this.view.onReadySgnl.addOnce($bind(this,this._onReady));
 		robotlegs_bender_bundles_mvcs_Mediator.prototype.initialize.call(this);
 		this.view.initialize();
-		this.view.onReadySgnl.addOnce($bind(this,this._onReady));
 	}
 	,_onReady: function() {
+		haxe_Log.trace("_onReady dispatched +++++++++++++++++++++++++++++>",{ fileName : "AppRootMediator.hx", lineNumber : 35, className : "etaminstudio.core.view.AppRootMediator", methodName : "_onReady"});
 		this.startupSgnl.dispatch();
 	}
 	,__class__: etaminstudio_core_view_AppRootMediator
@@ -5921,7 +6104,7 @@ robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.prototyp
 });
 var etaminstudio_core_view_AppRootView = function() {
 	robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.call(this);
-	haxe_Log.trace("++++ VIEW::",{ fileName : "AppRootView.hx", lineNumber : 22, className : "etaminstudio.core.view.AppRootView", methodName : "new"});
+	haxe_Log.trace("++++ VIEW::",{ fileName : "AppRootView.hx", lineNumber : 23, className : "etaminstudio.core.view.AppRootView", methodName : "new"});
 	this.addEventListener("addedToStage",$bind(this,this._onAddedToStage));
 	this.onReadySgnl = new msignal_Signal0();
 };
@@ -5931,7 +6114,7 @@ etaminstudio_core_view_AppRootView.__super__ = robotlegs_bender_extensions_displ
 etaminstudio_core_view_AppRootView.prototype = $extend(robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.prototype,{
 	onReadySgnl: null
 	,initialize: function() {
-		haxe_Log.trace("++++++++++++++++ VIEW INITIALIZE",{ fileName : "AppRootView.hx", lineNumber : 30, className : "etaminstudio.core.view.AppRootView", methodName : "initialize"});
+		haxe_Log.trace("++++++++++++++++ VIEW INITIALIZE",{ fileName : "AppRootView.hx", lineNumber : 34, className : "etaminstudio.core.view.AppRootView", methodName : "initialize"});
 	}
 	,_onAddedToStage: function(e) {
 		this.removeEventListener("addedToStage",$bind(this,this._onAddedToStage));
@@ -5939,9 +6122,12 @@ etaminstudio_core_view_AppRootView.prototype = $extend(robotlegs_bender_extensio
 		quad.set_x(10);
 		quad.set_y(10);
 		this.addChild(quad);
+		var assetManager = new starling_utils_AssetManager(etaminstudio_core_definitions_AppConstants.starlingRatio,false);
+		assetManager.set_verbose(true);
+		this.start(assetManager);
 	}
 	,start: function(assets) {
-		haxe_Log.trace("++++> ROOT START",{ fileName : "AppRootView.hx", lineNumber : 46, className : "etaminstudio.core.view.AppRootView", methodName : "start"});
+		haxe_Log.trace("++++> ROOT START",{ fileName : "AppRootView.hx", lineNumber : 53, className : "etaminstudio.core.view.AppRootView", methodName : "start"});
 		var navigator = new etaminstudio_core_view_Navigator(assets);
 		this.addChild(navigator);
 		this.onReadySgnl.dispatch();
@@ -5979,7 +6165,7 @@ etaminstudio_core_view_Navigator.prototype = $extend(starling_display_Sprite.pro
 });
 var etaminstudio_core_view_NavigatorMediator = function() {
 	this._isRegistred = false;
-	haxe_Log.trace("++++++++++++++++++NAVIGATOR++++++++++",{ fileName : "NavigatorMediator.hx", lineNumber : 38, className : "etaminstudio.core.view.NavigatorMediator", methodName : "new"});
+	haxe_Log.trace("++++++++++++++++++NAVIGATOR++++++++++",{ fileName : "NavigatorMediator.hx", lineNumber : 40, className : "etaminstudio.core.view.NavigatorMediator", methodName : "new"});
 };
 $hxClasses["etaminstudio.core.view.NavigatorMediator"] = etaminstudio_core_view_NavigatorMediator;
 etaminstudio_core_view_NavigatorMediator.__name__ = ["etaminstudio","core","view","NavigatorMediator"];
@@ -5998,19 +6184,20 @@ etaminstudio_core_view_NavigatorMediator.prototype = $extend(robotlegs_bender_bu
 		this._isRegistred = true;
 		this.view.onRegistred();
 		this.view.get_stage().addEventListener("resize",$bind(this,this._onResize));
-		haxe_Log.trace("++++++++++++++++++NAVIGATOR++++++++++",{ fileName : "NavigatorMediator.hx", lineNumber : 50, className : "etaminstudio.core.view.NavigatorMediator", methodName : "initialize"});
+		haxe_Log.trace("++++++++++++++++++NAVIGATOR INIT++++++++++",{ fileName : "NavigatorMediator.hx", lineNumber : 52, className : "etaminstudio.core.view.NavigatorMediator", methodName : "initialize"});
 	}
 	,_onResize: function(e) {
 		this.view.getStageResolution(e);
 	}
 	,changeSection: function(newSection) {
-		haxe_Log.trace("newSection: " + Std.string(newSection),{ fileName : "NavigatorMediator.hx", lineNumber : 60, className : "etaminstudio.core.view.NavigatorMediator", methodName : "changeSection"});
+		haxe_Log.trace("newSection: " + Std.string(newSection),{ fileName : "NavigatorMediator.hx", lineNumber : 62, className : "etaminstudio.core.view.NavigatorMediator", methodName : "changeSection"});
 		while(this._isRegistred == false) this.changeSection(newSection);
 		this.setSection(newSection.sectionName,newSection.viewVO,newSection.transitionType,newSection.duration);
 	}
 	,setSection: function(sectionName,data,transitionType,duration) {
 		this._transitionType = transitionType;
 		this._duration = duration;
+		haxe_Log.trace("setSection---->" + sectionName,{ fileName : "NavigatorMediator.hx", lineNumber : 81, className : "etaminstudio.core.view.NavigatorMediator", methodName : "setSection"});
 		var classRef = Type.resolveClass(sectionName);
 		if(classRef != null) {
 			this.view.nextiView = Type.createInstance(classRef,[this.view.assets]);
@@ -6020,13 +6207,62 @@ etaminstudio_core_view_NavigatorMediator.prototype = $extend(robotlegs_bender_bu
 			if(this.view.iView != null) this.view.iView.unactive();
 			this.view.addChild(this.view.nextContainer);
 			this.view.nextContainer.addChild(js_Boot.__cast(this.view.nextiView , etaminstudio_core_view_SectionView));
-		} else haxe_Log.trace("ERROR::fail on trying set section. The class ref:'" + sectionName + "' doesn't seems to match with an existing Class",{ fileName : "NavigatorMediator.hx", lineNumber : 107, className : "etaminstudio.core.view.NavigatorMediator", methodName : "setSection"});
+		} else haxe_Log.trace("ERROR::fail on trying set section. The class ref:'" + sectionName + "' doesn't seems to match with an existing Class",{ fileName : "NavigatorMediator.hx", lineNumber : 110, className : "etaminstudio.core.view.NavigatorMediator", methodName : "setSection"});
 	}
 	,transition: function(delay) {
 		if(delay == null) delay = 50;
-		haxe_Log.trace("transition(:" + Std.string($bind(this,this.transition)),{ fileName : "NavigatorMediator.hx", lineNumber : 115, className : "etaminstudio.core.view.NavigatorMediator", methodName : "transition"});
+		haxe_Log.trace("transition(:" + Std.string($bind(this,this.transition)),{ fileName : "NavigatorMediator.hx", lineNumber : 118, className : "etaminstudio.core.view.NavigatorMediator", methodName : "transition"});
+		var transitionType = this._transitionType;
+		var duration = this._duration;
+		switch(transitionType) {
+		case "Alpha":
+			motion_Actuate.tween(this.view.nextContainer,duration,{ alpha : 1}).onComplete($bind(this,this.dispose));
+			break;
+		case "CrossFade":
+			motion_Actuate.tween(this.view.currentContainer,duration,{ alpha : 0});
+			motion_Actuate.tween(this.view.nextContainer,duration,{ alpha : 1}).onComplete($bind(this,this.dispose));
+			break;
+		case "MoveToTheTop":
+			this.view.nextContainer.set_alpha(1);
+			this.view.nextContainer.set_y(this.view.stageH);
+			motion_Actuate.tween(this.view.nextContainer,duration,{ y : 0});
+			motion_Actuate.tween(this.view.currentContainer,duration,{ y : -this.view.stageH}).onComplete($bind(this,this.dispose));
+			break;
+		case "MoveToTheLeft":
+			this.view.nextContainer.set_alpha(1);
+			this.view.nextContainer.set_x(this.view.stageW);
+			motion_Actuate.tween(this.view.nextContainer,duration,{ x : 0});
+			motion_Actuate.tween(this.view.currentContainer,duration,{ x : -this.view.stageW}).onComplete($bind(this,this.dispose));
+			break;
+		case "MoveToTheRight":
+			this.view.nextContainer.set_alpha(1);
+			this.view.nextContainer.set_x(-this.view.stageW);
+			motion_Actuate.tween(this.view.nextContainer,duration,{ x : 0});
+			motion_Actuate.tween(this.view.currentContainer,duration,{ x : this.view.stageW}).onComplete($bind(this,this.dispose));
+			break;
+		case "MoveToTheBottom":
+			this.view.nextContainer.set_alpha(1);
+			this.view.nextContainer.set_y(-this.view.stageH);
+			motion_Actuate.tween(this.view.nextContainer,duration,{ y : 0});
+			motion_Actuate.tween(this.view.currentContainer,duration,{ y : this.view.stageH}).onComplete($bind(this,this.dispose));
+			break;
+		}
 	}
 	,dispose: function() {
+		haxe_Log.trace("DISPOSE OLD VIEW",{ fileName : "NavigatorMediator.hx", lineNumber : 173, className : "etaminstudio.core.view.NavigatorMediator", methodName : "dispose"});
+		if(this.view.iView != null) {
+			this.view.iView.dispose();
+			this.view.iView = null;
+		}
+		while(this.view.currentContainer.get_numChildren() > 0) this.view.currentContainer.removeChildAt(0);
+		this.view.removeChild(this.view.currentContainer,true);
+		this.view.currentContainer = null;
+		this.view.currentContainer = this.view.nextContainer;
+		this.view.iView = this.view.nextiView;
+		this.view.iView.active();
+		this.view.nextiView = null;
+		openfl_system_System.gc();
+		this.sectionChangedSgnl.dispatch();
 	}
 	,__class__: etaminstudio_core_view_NavigatorMediator
 });
@@ -6161,6 +6397,7 @@ haxe_IMap.prototype = {
 	,exists: null
 	,remove: null
 	,keys: null
+	,iterator: null
 	,toString: null
 	,__class__: haxe_IMap
 };
@@ -7108,6 +7345,11 @@ haxe_ds_BalancedTree.prototype = {
 		}
 		return false;
 	}
+	,iterator: function() {
+		var ret = [];
+		this.iteratorLoop(this.root,ret);
+		return HxOverrides.iter(ret);
+	}
 	,keys: function() {
 		var ret = [];
 		this.keysLoop(this.root,ret);
@@ -7128,6 +7370,13 @@ haxe_ds_BalancedTree.prototype = {
 		if(node == null) throw new js__$Boot_HaxeError("Not_found");
 		var c = this.compare(k,node.key);
 		if(c == 0) return this.merge(node.left,node.right); else if(c < 0) return this.balance(this.removeLoop(k,node.left),node.key,node.value,node.right); else return this.balance(node.left,node.key,node.value,this.removeLoop(k,node.right));
+	}
+	,iteratorLoop: function(node,acc) {
+		if(node != null) {
+			this.iteratorLoop(node.left,acc);
+			acc.push(node.value);
+			this.iteratorLoop(node.right,acc);
+		}
 	}
 	,keysLoop: function(node,acc) {
 		if(node != null) {
@@ -9541,6 +9790,18 @@ lime__$backend_html5_HTML5Window.prototype = {
 	,setBorderless: function(value) {
 		return value;
 	}
+	,setClipboard: function(value) {
+		if(window.document.queryCommandEnabled("copy")) {
+			var inputEnabled = this.enableTextEvents;
+			this.setEnableTextEvents(true);
+			this.setEnableTextEvents(false);
+			var cacheText = lime__$backend_html5_HTML5Window.textInput.value;
+			lime__$backend_html5_HTML5Window.textInput.value = value;
+			window.document.execCommand("copy");
+			lime__$backend_html5_HTML5Window.textInput.value = cacheText;
+			this.setEnableTextEvents(inputEnabled);
+		}
+	}
 	,setEnableTextEvents: function(value) {
 		if(value) {
 			if(lime__$backend_html5_HTML5Window.textInput == null) {
@@ -10355,6 +10616,7 @@ lime_app_Preloader.prototype = {
 	,libraryNames: null
 	,loadedLibraries: null
 	,loadedStage: null
+	,preloadStarted: null
 	,simulateProgress: null
 	,addLibrary: function(library) {
 		this.libraries.push(library);
@@ -10374,11 +10636,13 @@ lime_app_Preloader.prototype = {
 			this.bytesTotal += library.bytesTotal;
 		}
 		this.loadedLibraries = -1;
+		this.preloadStarted = false;
 		var _g3 = 0;
 		var _g11 = this.libraries;
 		while(_g3 < _g11.length) {
 			var library1 = [_g11[_g3]];
 			++_g3;
+			lime_utils_Log.verbose("Preloading asset library",{ fileName : "Preloader.hx", lineNumber : 152, className : "lime.app.Preloader", methodName : "load"});
 			library1[0].load().onProgress((function(library1) {
 				return function(loaded,total) {
 					if(!(_g2.bytesLoadedCache.h.__keys__[library1[0].__id__] != null)) _g2.bytesLoaded += loaded; else _g2.bytesLoaded += loaded - _g2.bytesLoadedCache.h[library1[0].__id__];
@@ -10388,12 +10652,11 @@ lime_app_Preloader.prototype = {
 			})(library1)).onComplete((function(library1) {
 				return function(_) {
 					if(!(_g2.bytesLoadedCache.h.__keys__[library1[0].__id__] != null)) _g2.bytesLoaded += library1[0].bytesTotal; else _g2.bytesLoaded += library1[0].bytesTotal - _g2.bytesLoadedCache.h[library1[0].__id__];
-					_g2.loadedLibraries++;
-					_g2.updateProgress();
+					_g2.loadedAssetLibrary();
 				};
 			})(library1)).onError((function() {
 				return function(e) {
-					haxe_Log.trace(e,{ fileName : "Preloader.hx", lineNumber : 185, className : "lime.app.Preloader", methodName : "load"});
+					haxe_Log.trace(e,{ fileName : "Preloader.hx", lineNumber : 190, className : "lime.app.Preloader", methodName : "load"});
 				};
 			})());
 		}
@@ -10405,6 +10668,15 @@ lime_app_Preloader.prototype = {
 			this.bytesTotal += 200;
 		}
 		this.loadedLibraries++;
+		this.preloadStarted = true;
+		this.updateProgress();
+	}
+	,loadedAssetLibrary: function(name) {
+		this.loadedLibraries++;
+		var current = this.loadedLibraries;
+		if(!this.preloadStarted) current++;
+		var totalLibraries = this.libraries.length + this.libraryNames.length;
+		if(name != null) lime_utils_Log.verbose("Loaded asset library: " + name + " [" + current + "/" + totalLibraries + "]",{ fileName : "Preloader.hx", lineNumber : 222, className : "lime.app.Preloader", methodName : "loadedAssetLibrary"}); else lime_utils_Log.verbose("Loaded asset library [" + current + "/" + totalLibraries + "]",{ fileName : "Preloader.hx", lineNumber : 226, className : "lime.app.Preloader", methodName : "loadedAssetLibrary"});
 		this.updateProgress();
 	}
 	,start: function() {
@@ -10424,6 +10696,7 @@ lime_app_Preloader.prototype = {
 			while(_g < _g1.length) {
 				var name = [_g1[_g]];
 				++_g;
+				lime_utils_Log.verbose("Preloading asset library: " + name[0],{ fileName : "Preloader.hx", lineNumber : 275, className : "lime.app.Preloader", methodName : "updateProgress"});
 				lime_utils_Assets.loadLibrary(name[0]).onProgress((function(name) {
 					return function(loaded,total) {
 						if(total > 0) {
@@ -10442,17 +10715,19 @@ lime_app_Preloader.prototype = {
 						var total1 = 200;
 						if(_g2.bytesTotalCache.exists(name[0])) total1 = _g2.bytesTotalCache.get(name[0]);
 						if(!_g2.bytesLoadedCache2.exists(name[0])) _g2.bytesLoaded += total1; else _g2.bytesLoaded += total1 - _g2.bytesLoadedCache2.get(name[0]);
-						_g2.loadedLibraries++;
-						_g2.updateProgress();
+						_g2.loadedAssetLibrary(name[0]);
 					};
 				})(name)).onError((function() {
 					return function(e) {
-						haxe_Log.trace(e,{ fileName : "Preloader.hx", lineNumber : 303, className : "lime.app.Preloader", methodName : "updateProgress"});
+						haxe_Log.trace(e,{ fileName : "Preloader.hx", lineNumber : 334, className : "lime.app.Preloader", methodName : "updateProgress"});
 					};
 				})());
 			}
 		}
-		if(!this.simulateProgress && this.loadedLibraries == this.libraries.length + this.libraryNames.length) this.start();
+		if(!this.simulateProgress && this.loadedLibraries == this.libraries.length + this.libraryNames.length) {
+			lime_utils_Log.verbose("Preload complete",{ fileName : "Preloader.hx", lineNumber : 344, className : "lime.app.Preloader", methodName : "updateProgress"});
+			this.start();
+		}
 	}
 	,__class__: lime_app_Preloader
 };
@@ -13640,6 +13915,9 @@ lime_graphics_format_PNG.encode = function(image) {
 	}
 	return null;
 };
+var lime_graphics_opengl_ExtensionAnisotropicFiltering = function() { };
+$hxClasses["lime.graphics.opengl.ExtensionAnisotropicFiltering"] = lime_graphics_opengl_ExtensionAnisotropicFiltering;
+lime_graphics_opengl_ExtensionAnisotropicFiltering.__name__ = ["lime","graphics","opengl","ExtensionAnisotropicFiltering"];
 var lime_graphics_opengl_ExtensionPackedDepthStencil = function() { };
 $hxClasses["lime.graphics.opengl.ExtensionPackedDepthStencil"] = lime_graphics_opengl_ExtensionPackedDepthStencil;
 lime_graphics_opengl_ExtensionPackedDepthStencil.__name__ = ["lime","graphics","opengl","ExtensionPackedDepthStencil"];
@@ -19343,6 +19621,18 @@ lime_net_HTTPRequestHeader.prototype = {
 	,value: null
 	,__class__: lime_net_HTTPRequestHeader
 };
+var lime_net__$HTTPRequest_$lime_$text_$Font = function(uri) {
+	lime_net__$HTTPRequest_$Bytes.call(this,uri);
+};
+$hxClasses["lime.net._HTTPRequest_lime_text_Font"] = lime_net__$HTTPRequest_$lime_$text_$Font;
+lime_net__$HTTPRequest_$lime_$text_$Font.__name__ = ["lime","net","_HTTPRequest_lime_text_Font"];
+lime_net__$HTTPRequest_$lime_$text_$Font.__super__ = lime_net__$HTTPRequest_$Bytes;
+lime_net__$HTTPRequest_$lime_$text_$Font.prototype = $extend(lime_net__$HTTPRequest_$Bytes.prototype,{
+	fromBytes: function(bytes) {
+		return lime_text_Font.fromBytes(bytes);
+	}
+	,__class__: lime_net__$HTTPRequest_$lime_$text_$Font
+});
 var lime_net__$HTTPRequest_$lime_$utils_$Bytes = function(uri) {
 	lime_net__$HTTPRequest_$Bytes.call(this,uri);
 };
@@ -19367,54 +19657,6 @@ lime_net__$HTTPRequest_$openfl_$utils_$ByteArray.prototype = $extend(lime_net__$
 	}
 	,__class__: lime_net__$HTTPRequest_$openfl_$utils_$ByteArray
 });
-var lime_system_BackgroundWorker = function() {
-	this.onProgress = new lime_app__$Event_$Dynamic_$Void();
-	this.onError = new lime_app__$Event_$Dynamic_$Void();
-	this.onComplete = new lime_app__$Event_$Dynamic_$Void();
-	this.doWork = new lime_app__$Event_$Dynamic_$Void();
-};
-$hxClasses["lime.system.BackgroundWorker"] = lime_system_BackgroundWorker;
-lime_system_BackgroundWorker.__name__ = ["lime","system","BackgroundWorker"];
-lime_system_BackgroundWorker.prototype = {
-	canceled: null
-	,completed: null
-	,doWork: null
-	,onComplete: null
-	,onError: null
-	,onProgress: null
-	,__runMessage: null
-	,cancel: function() {
-		this.canceled = true;
-	}
-	,run: function(message) {
-		this.canceled = false;
-		this.completed = false;
-		this.__runMessage = message;
-		this.__doWork();
-	}
-	,sendComplete: function(message) {
-		this.completed = true;
-		if(!this.canceled) {
-			this.canceled = true;
-			this.onComplete.dispatch(message);
-		}
-	}
-	,sendError: function(message) {
-		if(!this.canceled) {
-			this.canceled = true;
-			this.onError.dispatch(message);
-		}
-	}
-	,sendProgress: function(message) {
-		if(!this.canceled) this.onProgress.dispatch(message);
-	}
-	,__doWork: function() {
-		this.doWork.dispatch(this.__runMessage);
-	}
-	,__update: function(deltaTime) {
-	}
-	,__class__: lime_system_BackgroundWorker
-};
 var lime_system_CFFI = function() { };
 $hxClasses["lime.system.CFFI"] = lime_system_CFFI;
 lime_system_CFFI.__name__ = ["lime","system","CFFI"];
@@ -19495,7 +19737,8 @@ lime_system_Clipboard.get_text = function() {
 };
 lime_system_Clipboard.set_text = function(value) {
 	lime_system_Clipboard._text = value;
-	if(window.document.queryCommandEnabled("copy")) window.document.execCommand("copy");
+	var $window = lime_app_Application.current.__windows[0];
+	if($window != null) $window.backend.setClipboard(value);
 	return value;
 	return null;
 };
@@ -19881,7 +20124,10 @@ lime_text_Font.loadFromBytes = function(bytes) {
 	return lime_app_Future.withValue(lime_text_Font.fromBytes(bytes));
 };
 lime_text_Font.loadFromFile = function(path) {
-	return lime_app_Future.withValue(lime_text_Font.fromFile(path));
+	var request = new lime_net__$HTTPRequest_$lime_$text_$Font();
+	return request.load(path).then(function(font) {
+		if(font != null) return lime_app_Future.withValue(font); else return lime_app_Future.withError("");
+	});
 };
 lime_text_Font.loadFromName = function(path) {
 	var font = new lime_text_Font();
@@ -20774,7 +21020,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 675992;
+	this.version = 246521;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = ["lime","utils","AssetCache"];
@@ -20974,7 +21220,7 @@ lime_utils_Assets.isValidAudio = function(buffer) {
 	return buffer != null;
 };
 lime_utils_Assets.isValidImage = function(image) {
-	return image.buffer != null;
+	return image != null && image.buffer != null;
 };
 lime_utils_Assets.list = function(type) {
 	var items = [];
@@ -25427,7 +25673,7 @@ openfl__$internal_renderer_cairo_CairoGraphics.playCommands = function(commands,
 				data.advance();
 				data.prev = openfl__$internal_renderer_DrawCommandType.LINE_STYLE;
 				c8 = data;
-				if(stroke && openfl__$internal_renderer_cairo_CairoGraphics.hasStroke) openfl__$internal_renderer_cairo_CairoGraphics.closePath(c8.buffer.o[c8.oPos] == null);
+				if(stroke && openfl__$internal_renderer_cairo_CairoGraphics.hasStroke) openfl__$internal_renderer_cairo_CairoGraphics.closePath(true);
 				openfl__$internal_renderer_cairo_CairoGraphics.cairo.moveTo(positionX - offsetX,positionY - offsetY);
 				if(c8.buffer.o[c8.oPos] == null) openfl__$internal_renderer_cairo_CairoGraphics.hasStroke = false; else {
 					openfl__$internal_renderer_cairo_CairoGraphics.hasStroke = true;
@@ -26327,7 +26573,7 @@ openfl__$internal_renderer_canvas_CanvasGraphics.playCommands = function(command
 			data.advance();
 			data.prev = openfl__$internal_renderer_DrawCommandType.LINE_STYLE;
 			c7 = data;
-			if(stroke && openfl__$internal_renderer_canvas_CanvasGraphics.hasStroke) openfl__$internal_renderer_canvas_CanvasGraphics.closePath(c7.buffer.o[c7.oPos] == null);
+			if(stroke && openfl__$internal_renderer_canvas_CanvasGraphics.hasStroke) openfl__$internal_renderer_canvas_CanvasGraphics.closePath(true);
 			openfl__$internal_renderer_canvas_CanvasGraphics.context.moveTo(positionX - offsetX,positionY - offsetY);
 			if(c7.buffer.o[c7.oPos] == null) openfl__$internal_renderer_canvas_CanvasGraphics.hasStroke = false; else {
 				if(c7.buffer.o[c7.oPos] > 0) openfl__$internal_renderer_canvas_CanvasGraphics.context.lineWidth = c7.buffer.o[c7.oPos]; else openfl__$internal_renderer_canvas_CanvasGraphics.context.lineWidth = 1;
@@ -26495,8 +26741,14 @@ openfl__$internal_renderer_canvas_CanvasGraphics.render = function(graphics,rend
 			}
 			openfl__$internal_renderer_canvas_CanvasGraphics.context = graphics.__context;
 			var transform = graphics.__renderTransform;
-			graphics.__canvas.width = width;
-			graphics.__canvas.height = height;
+			var canvas = graphics.__canvas;
+			var devicePixelRatio = window.devicePixelRatio || 1;
+			var scaledWidth = width * devicePixelRatio | 0;
+			var scaledHeight = height * devicePixelRatio | 0;
+			if(canvas.width == scaledWidth && canvas.height == scaledHeight) openfl__$internal_renderer_canvas_CanvasGraphics.context.clearRect(0,0,scaledWidth,scaledHeight); else {
+				canvas.width = width;
+				canvas.height = height;
+			}
 			openfl__$internal_renderer_canvas_CanvasGraphics.context.setTransform(transform.a,transform.b,transform.c,transform.d,transform.tx,transform.ty);
 			openfl__$internal_renderer_canvas_CanvasGraphics.fillCommands.clear();
 			openfl__$internal_renderer_canvas_CanvasGraphics.strokeCommands.clear();
@@ -26938,7 +27190,6 @@ var openfl__$internal_renderer_canvas_CanvasRenderer = function(stage,context) {
 	this.context = context;
 	this.renderSession = new openfl__$internal_renderer_RenderSession();
 	this.renderSession.context = context;
-	this.renderSession.roundPixels = true;
 	this.renderSession.renderer = this;
 	this.renderSession.maskManager = new openfl__$internal_renderer_canvas_CanvasMaskManager(this.renderSession);
 };
@@ -26999,7 +27250,6 @@ openfl__$internal_renderer_canvas_CanvasTextField.__name__ = ["openfl","_interna
 openfl__$internal_renderer_canvas_CanvasTextField.disableInputMode = function(textEngine) {
 };
 openfl__$internal_renderer_canvas_CanvasTextField.enableInputMode = function(textEngine) {
-	textEngine.__cursorPosition = -1;
 	if(textEngine.__hiddenInput == null) {
 		textEngine.__hiddenInput = window.document.createElement("input");
 		var hiddenInput = textEngine.__hiddenInput;
@@ -27444,7 +27694,7 @@ openfl__$internal_renderer_dom_DOMTextField.measureText = function(textField) {
 openfl__$internal_renderer_dom_DOMTextField.render = function(textField,renderSession) {
 	var textEngine = textField.__textEngine;
 	if(textField.stage != null && textField.__worldVisible && textField.__renderable) {
-		if(textField.__dirty || textField.__div == null) {
+		if(textField.__dirty || textField.__renderTransformChanged || textField.__div == null) {
 			if(textEngine.text != "" || textEngine.background || textEngine.border || textEngine.type == 1) {
 				if(textField.__div == null) {
 					textField.__div = window.document.createElement("div");
@@ -27460,18 +27710,86 @@ openfl__$internal_renderer_dom_DOMTextField.render = function(textField,renderSe
 						}
 					},true);
 				}
-				if(!textEngine.multiline) textField.__style.setProperty("white-space","nowrap",null); else textField.__style.setProperty("word-wrap","break-word",null);
+				if(!textEngine.wordWrap) textField.__style.setProperty("white-space","nowrap",null); else textField.__style.setProperty("word-wrap","break-word",null);
 				textField.__style.setProperty("overflow","hidden",null);
-				if(textEngine.selectable) textField.__style.setProperty("cursor","text",null); else textField.__style.setProperty("cursor","inherit",null);
+				if(textEngine.selectable) {
+					textField.__style.setProperty("cursor","text",null);
+					textField.__style.setProperty("-webkit-user-select","text",null);
+					textField.__style.setProperty("-moz-user-select","text",null);
+					textField.__style.setProperty("-ms-user-select","text",null);
+					textField.__style.setProperty("-o-user-select","text",null);
+				} else textField.__style.setProperty("cursor","inherit",null);
 				textField.__div.contentEditable = textEngine.type == 1;
 				var style = textField.__style;
-				textField.__div.innerHTML = new EReg("\n","g").replace(textEngine.text,"<br>");
 				if(textEngine.background) style.setProperty("background-color","#" + StringTools.hex(textEngine.backgroundColor & 16777215,6),null); else style.removeProperty("background-color");
-				if(textEngine.border) style.setProperty("border","solid 1px #" + StringTools.hex(textEngine.borderColor & 16777215,6),null); else style.removeProperty("border");
+				var w = textEngine.width;
+				var h = textEngine.height;
+				var scale = 1;
+				var unscaledSize = textField.__textFormat.size;
+				var scaledSize = unscaledSize;
+				var t = textField.__renderTransform;
+				if(t.a != 1.0 || t.d != 1.0) {
+					if(t.a == t.d) {
+						scale = t.a;
+						t.a = t.d = 1.0;
+					} else if(t.a > t.d) {
+						scale = t.a;
+						t.d /= t.a;
+						t.a = 1.0;
+					} else {
+						scale = t.d;
+						t.a /= t.d;
+						t.d = 1.0;
+					}
+					scaledSize *= scale;
+					w = Math.ceil(w * scale);
+					h = Math.ceil(h * scale);
+				}
+				textField.__textFormat.size = scaledSize;
+				var text = textEngine.text;
+				var adjustment = 0;
+				if(!textField.__isHTML) text = StringTools.htmlEscape(text); else {
+					var matchText = text;
+					while(openfl__$internal_renderer_dom_DOMTextField.__regexFont.match(matchText)) {
+						var fontText = openfl__$internal_renderer_dom_DOMTextField.__regexFont.matched(0);
+						var style1 = "";
+						if(openfl__$internal_renderer_dom_DOMTextField.__regexFace.match(fontText)) style1 += "font-family:'" + openfl__$internal_renderer_dom_DOMTextField.__getAttributeMatch(openfl__$internal_renderer_dom_DOMTextField.__regexFace) + "';";
+						if(openfl__$internal_renderer_dom_DOMTextField.__regexColor.match(fontText)) style1 += "color:#" + openfl__$internal_renderer_dom_DOMTextField.__getAttributeMatch(openfl__$internal_renderer_dom_DOMTextField.__regexColor) + ";";
+						if(openfl__$internal_renderer_dom_DOMTextField.__regexSize.match(fontText)) {
+							var sizeAttr = openfl__$internal_renderer_dom_DOMTextField.__getAttributeMatch(openfl__$internal_renderer_dom_DOMTextField.__regexSize);
+							var firstChar = HxOverrides.cca(sizeAttr,0);
+							var size;
+							adjustment = parseFloat(sizeAttr) * scale;
+							if(firstChar == 43 || firstChar == 45) size = scaledSize + adjustment; else size = adjustment;
+							style1 += "font-size:" + size + "px;";
+						}
+						text = StringTools.replace(text,fontText,"<span style='" + style1 + "'>");
+						matchText = openfl__$internal_renderer_dom_DOMTextField.__regexFont.matchedRight();
+					}
+					text = openfl__$internal_renderer_dom_DOMTextField.__regexCloseFont.replace(text,"</span>");
+				}
+				text = StringTools.replace(text,"<p ","<p style='margin-top:0; margin-bottom:0;' ");
+				var unscaledLeading = textField.__textFormat.leading;
+				textField.__textFormat.leading += adjustment | 0;
+				textField.__div.innerHTML = new EReg("\r\n","g").replace(text,"<br>");
+				textField.__div.innerHTML = new EReg("\n","g").replace(textField.__div.innerHTML,"<br>");
+				textField.__div.innerHTML = new EReg("\r","g").replace(textField.__div.innerHTML,"<br>");
 				style.setProperty("font",openfl__$internal_text_TextEngine.getFont(textField.__textFormat),null);
+				textField.__textFormat.size = unscaledSize;
+				textField.__textFormat.leading = unscaledLeading;
+				style.setProperty("top","3px",null);
+				if(textEngine.border) {
+					style.setProperty("border","solid 1px #" + StringTools.hex(textEngine.borderColor & 16777215,6),null);
+					textField.__renderTransform.translate(-1,-1);
+					textField.__renderTransformChanged = true;
+					textField.__transformDirty = true;
+				} else if(style.border != "") {
+					style.removeProperty("border");
+					textField.__renderTransformChanged = true;
+				}
 				style.setProperty("color","#" + StringTools.hex(textField.__textFormat.color & 16777215,6),null);
-				if(textEngine.autoSize != 2) style.setProperty("width","auto",null); else style.setProperty("width",textEngine.width + "px",null);
-				style.setProperty("height",textEngine.height + "px",null);
+				style.setProperty("width",w + "px",null);
+				style.setProperty("height",h + "px",null);
 				var _g = textField.__textFormat.align;
 				switch(_g) {
 				case 0:
@@ -27498,6 +27816,9 @@ openfl__$internal_renderer_dom_DOMTextField.render = function(textField,renderSe
 		textField.__div = null;
 		textField.__style = null;
 	}
+};
+openfl__$internal_renderer_dom_DOMTextField.__getAttributeMatch = function(regex) {
+	if(regex.matched(2) != null) return regex.matched(2); else return regex.matched(3);
 };
 var openfl__$internal_renderer_opengl_GLBitmap = function() { };
 $hxClasses["openfl._internal.renderer.opengl.GLBitmap"] = openfl__$internal_renderer_opengl_GLBitmap;
@@ -27606,22 +27927,45 @@ openfl__$internal_renderer_opengl_GLFilterManager.prototype = $extend(openfl__$i
 	}
 	,popObject: function(object) {
 		if(object.__filters != null && object.__filters.length > 0) {
-			var filter = object.__filters[0];
-			var currentTarget;
-			var shader;
-			if(object.__filters.length > 1 || filter.__numPasses > 0) {
-				var _g1 = 0;
-				var _g = filter.__numPasses;
-				while(_g1 < _g) {
-					var i = _g1++;
-					currentTarget = this.renderer.currentRenderTarget;
-					this.renderer.getRenderTarget(true);
-					shader = filter.__initShader(this.renderSession,i);
-					this.renderPass(currentTarget,shader);
+			var numPasses = 0;
+			if(object.__filters.length > 1 || object.__filters[0].__numPasses > 0) {
+				numPasses = object.__filters.length;
+				var _g = 0;
+				var _g1 = object.__filters;
+				while(_g < _g1.length) {
+					var filter = _g1[_g];
+					++_g;
+					if(filter.__numPasses > 0) numPasses += filter.__numPasses - 1; else numPasses += 0;
 				}
-				this.filterDepth--;
-				this.renderer.getRenderTarget(this.filterDepth > 0);
-				this.renderPass(this.renderer.currentRenderTarget,this.renderSession.shaderManager.defaultShader);
+			}
+			if(numPasses > 0) {
+				var currentTarget;
+				var shader;
+				var _g2 = 0;
+				var _g11 = object.__filters;
+				while(_g2 < _g11.length) {
+					var filter1 = _g11[_g2];
+					++_g2;
+					if(filter1.__numPasses > 0) {
+						var _g3 = 0;
+						var _g21 = filter1.__numPasses;
+						while(_g3 < _g21) {
+							var i = _g3++;
+							currentTarget = this.renderer.currentRenderTarget;
+							this.renderer.getRenderTarget(true);
+							shader = filter1.__initShader(this.renderSession,i);
+							this.renderPass(currentTarget,shader);
+						}
+					} else {
+						currentTarget = this.renderer.currentRenderTarget;
+						this.renderer.getRenderTarget(true);
+						shader = filter1.__initShader(this.renderSession,0);
+						this.renderPass(currentTarget,shader);
+					}
+					this.filterDepth--;
+					this.renderer.getRenderTarget(this.filterDepth > 0);
+					this.renderPass(this.renderer.currentRenderTarget,this.renderSession.shaderManager.defaultShader);
+				}
 			} else this.filterDepth--;
 		}
 	}
@@ -27715,7 +28059,6 @@ var openfl__$internal_renderer_opengl_GLRenderer = function(stage,gl,flipped) {
 	this.values = [];
 	this.renderSession = new openfl__$internal_renderer_RenderSession();
 	this.renderSession.gl = gl;
-	this.renderSession.roundPixels = true;
 	this.renderSession.renderer = this;
 	this.renderSession.blendModeManager = new openfl__$internal_renderer_opengl_GLBlendModeManager(gl);
 	this.renderSession.filterManager = new openfl__$internal_renderer_opengl_GLFilterManager(this,this.renderSession);
@@ -27920,7 +28263,6 @@ $hxClasses["openfl._internal.renderer.opengl.GLStage3D"] = openfl__$internal_ren
 openfl__$internal_renderer_opengl_GLStage3D.__name__ = ["openfl","_internal","renderer","opengl","GLStage3D"];
 openfl__$internal_renderer_opengl_GLStage3D.render = function(stage3D,renderSession) {
 	if(stage3D.context3D != null) {
-		renderSession.gl.depthMask(true);
 		renderSession.blendModeManager.setBlendMode(null);
 		if(renderSession.shaderManager.currentShader != null) {
 			renderSession.shaderManager.setShader(null);
@@ -28223,13 +28565,12 @@ openfl__$internal_stage3D_AGALConverter.convertToGLSL = function(agal,samplerSta
 		var version1 = lime_graphics_opengl_GL.context.getParameter(7938);
 		openfl__$internal_stage3D_AGALConverter.limitedProfile = version1.indexOf("OpenGL ES") > -1 || version1.indexOf("WebGL") > -1;
 	}
-	var glslVersion = 100;
 	var glsl = new StringBuf();
 	glsl.b += Std.string("// AGAL " + (programType == openfl__$internal_stage3D__$AGALConverter_ProgramType.VERTEX?"vertex":"fragment") + " shader\n");
 	if(openfl__$internal_stage3D_AGALConverter.limitedProfile) {
-		glsl.b += Std.string("#version " + glslVersion + "\n");
+		glsl.b += "#version 100\n";
 		glsl.b += "precision highp float;\n";
-	}
+	} else glsl.b += "#version 120\n";
 	glsl.add(map.toGLSL(false));
 	if(programType == openfl__$internal_stage3D__$AGALConverter_ProgramType.VERTEX) glsl.b += "uniform vec4 vcPositionScale;\n";
 	glsl.b += "void main() {\n";
@@ -28386,10 +28727,10 @@ openfl__$internal_stage3D_RegisterMap.prototype = {
 				sb_b += "samplerCube ";
 				break;
 			case 0:
-				haxe_Log.trace("Missing switch patten: RegisterUsage.UNUSED",{ fileName : "AGALConverter.hx", lineNumber : 765, className : "openfl._internal.stage3D.RegisterMap", methodName : "toGLSL"});
+				haxe_Log.trace("Missing switch patten: RegisterUsage.UNUSED",{ fileName : "AGALConverter.hx", lineNumber : 767, className : "openfl._internal.stage3D.RegisterMap", methodName : "toGLSL"});
 				break;
 			case 4:
-				haxe_Log.trace("Missing switch patten: RegisterUsage.SAMPLER_2D_ALPHA",{ fileName : "AGALConverter.hx", lineNumber : 769, className : "openfl._internal.stage3D.RegisterMap", methodName : "toGLSL"});
+				haxe_Log.trace("Missing switch patten: RegisterUsage.SAMPLER_2D_ALPHA",{ fileName : "AGALConverter.hx", lineNumber : 771, className : "openfl._internal.stage3D.RegisterMap", methodName : "toGLSL"});
 				break;
 			}
 			if(entry.usage == openfl__$internal_stage3D__$AGALConverter_RegisterUsage.SAMPLER_2D_ALPHA) {
@@ -29028,47 +29369,78 @@ openfl__$internal_stage3D_GLUtils.CheckGLError = function() {
 	var error = lime_graphics_opengl_GL.context.getError();
 	if(error != 0) throw new js__$Boot_HaxeError(new openfl_errors_IllegalOperationError("Error calling openGL api. Error: " + error + "\n"));
 };
-var openfl__$internal_stage3D_SamplerState = function(minFilter,magFilter,wrapModeS,wrapModeT,lodBias,maxAniso,ignoreSampler,centroid) {
+var openfl__$internal_stage3D_SamplerState = function(minFilter,magFilter,wrapModeS,wrapModeT,lodBias,maxAniso,ignoreSampler,centroid,mipmapGenerated) {
+	if(mipmapGenerated == null) mipmapGenerated = false;
 	if(centroid == null) centroid = false;
 	if(ignoreSampler == null) ignoreSampler = false;
 	if(maxAniso == null) maxAniso = 0.0;
 	if(lodBias == null) lodBias = 0.0;
-	this.minFilter = minFilter;
-	this.magFilter = magFilter;
-	this.wrapModeS = wrapModeS;
-	this.wrapModeT = wrapModeT;
-	this.lodBias = lodBias;
-	this.maxAniso = maxAniso;
+	this.set_minFilter(minFilter);
+	this.set_magFilter(magFilter);
+	this.set_wrapModeS(wrapModeS);
+	this.set_wrapModeT(wrapModeT);
+	this.set_lodBias(lodBias);
+	this.set_maxAniso(maxAniso);
 	this.ignoreSampler = ignoreSampler;
 	this.centroid = centroid;
+	this.mipmapGenerated = mipmapGenerated;
+	this.__samplerDirty = true;
 };
 $hxClasses["openfl._internal.stage3D.SamplerState"] = openfl__$internal_stage3D_SamplerState;
 openfl__$internal_stage3D_SamplerState.__name__ = ["openfl","_internal","stage3D","SamplerState"];
 openfl__$internal_stage3D_SamplerState.prototype = {
-	centroid: null
-	,ignoreSampler: null
-	,lodBias: null
+	lodBias: null
 	,magFilter: null
 	,maxAniso: null
 	,minFilter: null
 	,wrapModeS: null
 	,wrapModeT: null
+	,centroid: null
+	,ignoreSampler: null
+	,mipmapGenerated: null
+	,__samplerDirty: null
 	,copyFrom: function(other) {
 		if(other == null || other.ignoreSampler) return;
-		this.minFilter = other.minFilter;
-		this.magFilter = other.magFilter;
-		this.wrapModeS = other.wrapModeS;
-		this.wrapModeT = other.wrapModeT;
-		this.lodBias = other.lodBias;
-		this.maxAniso = other.maxAniso;
+		this.set_minFilter(other.minFilter);
+		this.set_magFilter(other.magFilter);
+		this.set_wrapModeS(other.wrapModeS);
+		this.set_wrapModeT(other.wrapModeT);
+		this.set_lodBias(other.lodBias);
+		this.set_maxAniso(other.maxAniso);
 		this.centroid = other.centroid;
+		this.mipmapGenerated = other.mipmapGenerated;
 	}
 	,equals: function(other) {
-		if(this == other) return true;
+		if(this == other) return !this.__samplerDirty;
 		if(other == null) return false;
-		return this.minFilter == other.minFilter && this.magFilter == other.magFilter && this.wrapModeS == other.wrapModeS && this.wrapModeT == other.wrapModeT && this.lodBias == other.lodBias && this.maxAniso == other.maxAniso;
+		return this.minFilter == other.minFilter && this.magFilter == other.magFilter && this.wrapModeS == other.wrapModeS && this.wrapModeT == other.wrapModeT && this.lodBias == other.lodBias && this.maxAniso == other.maxAniso && this.mipmapGenerated == other.mipmapGenerated;
+	}
+	,set_lodBias: function(value) {
+		if(this.lodBias != value) this.__samplerDirty = true;
+		return this.lodBias = value;
+	}
+	,set_magFilter: function(value) {
+		if(this.magFilter != value) this.__samplerDirty = true;
+		return this.magFilter = value;
+	}
+	,set_maxAniso: function(value) {
+		if(this.maxAniso != value) this.__samplerDirty = true;
+		return this.maxAniso = value;
+	}
+	,set_minFilter: function(value) {
+		if(this.minFilter != value) this.__samplerDirty = true;
+		return this.minFilter = value;
+	}
+	,set_wrapModeS: function(value) {
+		if(this.wrapModeS != value) this.__samplerDirty = true;
+		return this.wrapModeS = value;
+	}
+	,set_wrapModeT: function(value) {
+		if(this.wrapModeT != value) this.__samplerDirty = true;
+		return this.wrapModeT = value;
 	}
 	,__class__: openfl__$internal_stage3D_SamplerState
+	,__properties__: {set_wrapModeT:"set_wrapModeT",set_wrapModeS:"set_wrapModeS",set_minFilter:"set_minFilter",set_maxAniso:"set_maxAniso",set_magFilter:"set_magFilter",set_lodBias:"set_lodBias"}
 };
 var openfl__$internal_swf_FilterType = $hxClasses["openfl._internal.swf.FilterType"] = { __ename__ : ["openfl","_internal","swf","FilterType"], __constructs__ : ["BlurFilter","ColorMatrixFilter","DropShadowFilter","GlowFilter"] };
 openfl__$internal_swf_FilterType.BlurFilter = function(blurX,blurY,quality) { var $x = ["BlurFilter",0,blurX,blurY,quality]; $x.__enum__ = openfl__$internal_swf_FilterType; $x.toString = $estr; return $x; };
@@ -29654,7 +30026,7 @@ openfl__$internal_text_TextEngine.getFont = function(format) {
 	font += "normal ";
 	if(format.bold) font += "bold "; else font += "normal ";
 	font += format.size + "px";
-	font += "/" + (format.size + format.leading + 6) + "px ";
+	font += "/" + (format.leading + format.size + 3) + "px ";
 	font += "" + (function($this) {
 		var $r;
 		var _g = format.font;
@@ -29720,7 +30092,6 @@ openfl__$internal_text_TextEngine.prototype = {
 	,width: null
 	,wordWrap: null
 	,textField: null
-	,__cursorPosition: null
 	,__cursorTimer: null
 	,__hasFocus: null
 	,__isKeyDown: null
@@ -30538,6 +30909,7 @@ openfl_display_Bitmap.prototype = $extend(openfl_display_DisplayObject.prototype
 		var px = this.__renderTransform.__transformInverseX(x,y);
 		var py = this.__renderTransform.__transformInverseY(x,y);
 		if(px > 0 && py > 0 && px <= this.bitmapData.width && py <= this.bitmapData.height) {
+			if(this.__scrollRect != null && !this.__scrollRect.contains(px,py)) return false;
 			if(stack != null && !interactiveOnly) stack.push(hitObject);
 			return true;
 		}
@@ -30908,7 +31280,6 @@ openfl_display_BitmapData.prototype = {
 			var renderSession1 = new openfl__$internal_renderer_RenderSession();
 			renderSession1.context = buffer.__srcContext;
 			renderSession1.allowSmoothing = smoothing;
-			renderSession1.roundPixels = true;
 			renderSession1.maskManager = new openfl__$internal_renderer_canvas_CanvasMaskManager(renderSession1);
 			if(!smoothing) {
 				buffer.__srcContext.mozImageSmoothingEnabled = false;
@@ -31129,7 +31500,7 @@ openfl_display_BitmapData.prototype = {
 			var y = secondPoint.y - firstPoint.y | 0;
 			if(this.rect.contains(x,y)) {
 				var pixel = this.getPixel32(x,y);
-				if((pixel >> 24 & 255) >= firstAlphaThreshold) return true;
+				if((pixel >> 24 & 255) > firstAlphaThreshold) return true;
 			}
 		} else if(js_Boot.__instanceof(secondObject,openfl_display_BitmapData)) {
 			var secondBitmapData = secondObject;
@@ -31156,7 +31527,7 @@ openfl_display_BitmapData.prototype = {
 					var i = _g++;
 					pixel1 = pixels.readUnsignedInt();
 					testPixel = testPixels.readUnsignedInt();
-					if((pixel1 >> 24 & 255) >= firstAlphaThreshold && (testPixel >> 24 & 255) >= secondAlphaThreshold) return true;
+					if((pixel1 >> 24 & 255) > firstAlphaThreshold && (testPixel >> 24 & 255) > secondAlphaThreshold) return true;
 				}
 				return false;
 			}
@@ -31173,7 +31544,7 @@ openfl_display_BitmapData.prototype = {
 				while(_g1 < length1) {
 					var i1 = _g1++;
 					pixel2 = pixels1.readUnsignedInt();
-					if((pixel2 >> 24 & 255) >= firstAlphaThreshold) return true;
+					if((pixel2 >> 24 & 255) > firstAlphaThreshold) return true;
 				}
 			}
 		}
@@ -32464,157 +32835,54 @@ openfl_display_Loader.prototype = $extend(openfl_display_DisplayObjectContainer.
 	content: null
 	,contentLoaderInfo: null
 	,close: function() {
-		openfl_Lib.notImplemented({ fileName : "Loader.hx", lineNumber : 48, className : "openfl.display.Loader", methodName : "close"});
+		openfl_Lib.notImplemented({ fileName : "Loader.hx", lineNumber : 45, className : "openfl.display.Loader", methodName : "close"});
 	}
 	,load: function(request,context) {
-		var _g = this;
-		var extension = "";
-		var path = request.url;
-		var queryIndex = path.indexOf("?");
-		if(queryIndex > -1) path = path.substring(0,queryIndex);
-		var extIndex = path.lastIndexOf(".");
-		if(extIndex > -1) extension = path.substring(extIndex + 1);
 		this.contentLoaderInfo.url = request.url;
-		if(request.contentType == null || request.contentType == "") switch(extension) {
-		case "json":
-			this.contentLoaderInfo.contentType = "application/json";
-			break;
-		case "swf":
-			this.contentLoaderInfo.contentType = "application/x-shockwave-flash";
-			break;
-		case "jpg":case "jpeg":
-			this.contentLoaderInfo.contentType = "image/jpeg";
-			break;
-		case "png":
-			this.contentLoaderInfo.contentType = "image/png";
-			break;
-		case "gif":
-			this.contentLoaderInfo.contentType = "image/gif";
-			break;
-		case "js":
-			this.contentLoaderInfo.contentType = "application/javascript";
-			break;
-		default:
-			this.contentLoaderInfo.contentType = "application/x-www-form-urlencoded";
+		if(request.contentType == null || request.contentType == "") {
+			var extension = "";
+			var path = request.url;
+			var queryIndex = path.indexOf("?");
+			if(queryIndex > -1) path = path.substring(0,queryIndex);
+			var extIndex = path.lastIndexOf(".");
+			if(extIndex > -1) extension = path.substring(extIndex + 1);
+			switch(extension) {
+			case "json":
+				this.contentLoaderInfo.contentType = "application/json";
+				break;
+			case "swf":
+				this.contentLoaderInfo.contentType = "application/x-shockwave-flash";
+				break;
+			case "jpg":case "jpeg":
+				this.contentLoaderInfo.contentType = "image/jpeg";
+				break;
+			case "png":
+				this.contentLoaderInfo.contentType = "image/png";
+				break;
+			case "gif":
+				this.contentLoaderInfo.contentType = "image/gif";
+				break;
+			case "js":
+				this.contentLoaderInfo.contentType = "application/javascript";
+				break;
+			default:
+				this.contentLoaderInfo.contentType = "application/x-www-form-urlencoded";
+			}
 		} else this.contentLoaderInfo.contentType = request.contentType;
-		if(this.contentLoaderInfo.contentType.indexOf("/javascript") > -1 || this.contentLoaderInfo.contentType.indexOf("/ecmascript") > -1) {
-			var loader = new openfl_net_URLLoader();
-			loader.addEventListener("complete",function(e) {
-				_g.contentLoaderInfo.content = new openfl_display_Sprite();
-				_g.addChild(_g.contentLoaderInfo.content);
-				eval("(function () {" + Std.string(loader.data) + "})()");
-				var event = new openfl_events_Event("complete");
-				event.target = _g.contentLoaderInfo;
-				event.currentTarget = _g.contentLoaderInfo;
-				_g.contentLoaderInfo.dispatchEvent(event);
-			});
-			loader.addEventListener("ioError",function(e1) {
-				_g.BitmapData_onError(e1);
-			});
-			loader.dataFormat = 1;
-			loader.load(request);
+		if(this.contentLoaderInfo.contentType.indexOf("image/") > -1 && request.method == "GET" && (request.requestHeaders == null || request.requestHeaders.length == 0) && request.userAgent == null) {
+			openfl_display_BitmapData.loadFromFile(request.url).onComplete($bind(this,this.BitmapData_onLoad)).onError($bind(this,this.BitmapData_onError)).onProgress($bind(this,this.BitmapData_onProgress));
 			return;
-		} else if(this.contentLoaderInfo.contentType.indexOf("/json") > -1) {
-			var loader1 = new openfl_net_URLLoader();
-			loader1.addEventListener("complete",function(e2) {
-				var info = JSON.parse(loader1.data);
-				var library = Type.createInstance(Type.resolveClass(info.type),[null]);
-				openfl_Assets.registerLibrary(info.name,library);
-				var manifest = haxe_Unserializer.run(info.manifest);
-				var assetType;
-				var basePath = request.url;
-				basePath = StringTools.replace(basePath,"\\","/");
-				var parts = basePath.split("/");
-				parts.pop();
-				parts.pop();
-				basePath = parts.join("/");
-				var libraryData = null;
-				var loaded = -1;
-				var total = 0;
-				var checkLoaded = function() {
-					if(loaded >= total) {
-						library.swf = openfl__$internal_swf_SWFLite.unserialize(libraryData);
-						_g.contentLoaderInfo.content = library.getMovieClip("");
-						_g.addChild(_g.contentLoaderInfo.content);
-						var event1 = new openfl_events_Event("complete");
-						event1.target = _g.contentLoaderInfo;
-						event1.currentTarget = _g.contentLoaderInfo;
-						_g.contentLoaderInfo.dispatchEvent(event1);
-					}
-				};
-				var _g1 = 0;
-				while(_g1 < manifest.length) {
-					var asset = [manifest[_g1]];
-					++_g1;
-					if(!openfl_Assets.exists(asset[0].id)) {
-						assetType = asset[0].type;
-						switch(assetType) {
-						case "IMAGE":
-							total++;
-							openfl_display_BitmapData.fromFile(basePath + "/" + Std.string(asset[0].path),(function(asset) {
-								return function(bitmapData) {
-									loaded++;
-									checkLoaded();
-									openfl_Assets.cache.setBitmapData(asset[0].path,bitmapData);
-								};
-							})(asset),(function() {
-								return function() {
-									_g.BitmapData_onError(null);
-								};
-							})());
-							break;
-						case "TEXT":
-							total++;
-							var textLoader = [new openfl_net_URLLoader()];
-							textLoader[0].addEventListener("complete",(function(textLoader) {
-								return function(_) {
-									libraryData = textLoader[0].data;
-									loaded++;
-									checkLoaded();
-								};
-							})(textLoader));
-							textLoader[0].addEventListener("ioError",(function() {
-								return function(e3) {
-									_g.BitmapData_onError(e3);
-								};
-							})());
-							textLoader[0].dataFormat = 1;
-							textLoader[0].load(new openfl_net_URLRequest(basePath + "/" + Std.string(asset[0].path)));
-							break;
-						default:
-						}
-					}
-				}
-				loaded++;
-				checkLoaded();
-			});
-			loader1.addEventListener("ioError",function(e4) {
-				_g.BitmapData_onError(e4);
-			});
-			loader1.dataFormat = 1;
-			loader1.load(request);
 		}
-		var worker = new lime_system_BackgroundWorker();
-		worker.doWork.add(function(_1) {
-			openfl_display_BitmapData.fromFile(path,function(bitmapData1) {
-				worker.sendComplete(bitmapData1);
-			},function() {
-				worker.sendError("ioError");
-			});
-		});
-		worker.onError.add($bind(this,this.BitmapData_onError));
-		worker.onComplete.add($bind(this,this.BitmapData_onLoad));
-		worker.run();
+		var loader = new openfl_net_URLLoader();
+		loader.dataFormat = 0;
+		if(this.contentLoaderInfo.contentType.indexOf("/json") > -1 || this.contentLoaderInfo.contentType.indexOf("/javascript") > -1 || this.contentLoaderInfo.contentType.indexOf("/ecmascript") > -1) loader.dataFormat = 1;
+		loader.addEventListener("complete",$bind(this,this.loader_onComplete));
+		loader.addEventListener("ioError",$bind(this,this.loader_onError));
+		loader.addEventListener("progress",$bind(this,this.loader_onProgress));
+		loader.load(request);
 	}
 	,loadBytes: function(buffer,context) {
-		var worker = new lime_system_BackgroundWorker();
-		worker.doWork.add(function(_) {
-			openfl_display_BitmapData.fromBytes(buffer,null,function(bitmapData) {
-				worker.sendComplete(bitmapData);
-			});
-		});
-		worker.onComplete.add($bind(this,this.BitmapData_onLoad));
-		worker.run();
+		openfl_display_BitmapData.loadFromBytes(buffer).onComplete($bind(this,this.BitmapData_onLoad)).onError($bind(this,this.BitmapData_onError));
 	}
 	,unload: function() {
 		if(this.get_numChildren() > 0) {
@@ -32627,28 +32895,73 @@ openfl_display_Loader.prototype = $extend(openfl_display_DisplayObjectContainer.
 			this.contentLoaderInfo.bytesTotal = 0;
 			this.contentLoaderInfo.width = 0;
 			this.contentLoaderInfo.height = 0;
-			var event = new openfl_events_Event("unload");
-			event.currentTarget = this;
-			this.__dispatchEvent(event);
+			this.dispatchEvent(new openfl_events_Event("unload"));
 		}
 	}
 	,unloadAndStop: function(gc) {
 		if(gc == null) gc = true;
-		openfl_Lib.notImplemented({ fileName : "Loader.hx", lineNumber : 321, className : "openfl.display.Loader", methodName : "unloadAndStop"});
+		if(this.content != null) this.content.__stopAllMovieClips();
+		var _g1 = 0;
+		var _g = this.get_numChildren();
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.getChildAt(i).__stopAllMovieClips();
+		}
+		this.unload();
+		if(gc) {
+		}
+	}
+	,__dispatchError: function(text) {
+		var event = new openfl_events_IOErrorEvent("ioError");
+		event.text = text;
+		this.dispatchEvent(event);
+	}
+	,BitmapData_onError: function(error) {
+		this.__dispatchError(Std.string(error));
 	}
 	,BitmapData_onLoad: function(bitmapData) {
 		this.contentLoaderInfo.content = new openfl_display_Bitmap(bitmapData);
 		this.content = this.contentLoaderInfo.content;
 		this.addChild(this.content);
-		var event = new openfl_events_Event("complete");
-		event.target = this.contentLoaderInfo;
-		event.currentTarget = this.contentLoaderInfo;
+		this.contentLoaderInfo.dispatchEvent(new openfl_events_Event("complete"));
+	}
+	,BitmapData_onProgress: function(bytesLoaded,bytesTotal) {
+		var event = new openfl_events_ProgressEvent("progress");
+		event.bytesLoaded = bytesLoaded;
+		event.bytesTotal = bytesTotal;
 		this.contentLoaderInfo.dispatchEvent(event);
 	}
-	,BitmapData_onError: function(_) {
-		var event = new openfl_events_IOErrorEvent("ioError");
+	,loader_onComplete: function(event) {
+		var loader = event.target;
+		if(this.contentLoaderInfo.contentType.indexOf("/json") > -1) {
+			var manifest = lime_utils_AssetManifest.parse(loader.data);
+			if(manifest == null) {
+				this.__dispatchError("Cannot parse asset manifest");
+				return;
+			}
+			var library = lime_utils_AssetLibrary.fromManifest(manifest);
+			if(library == null) {
+				this.__dispatchError("Cannot open library");
+				return;
+			}
+			if(js_Boot.__instanceof(library,openfl_AssetLibrary)) {
+				this.contentLoaderInfo.content = (js_Boot.__cast(library , openfl_AssetLibrary)).getMovieClip("");
+				this.addChild(this.contentLoaderInfo.content);
+				this.contentLoaderInfo.dispatchEvent(new openfl_events_Event("complete"));
+			}
+		} else if(this.contentLoaderInfo.contentType.indexOf("/javascript") > -1 || this.contentLoaderInfo.contentType.indexOf("/ecmascript") > -1) {
+			this.contentLoaderInfo.content = new openfl_display_Sprite();
+			this.addChild(this.contentLoaderInfo.content);
+			eval("(function () {" + Std.string(loader.data) + "})()");
+			this.contentLoaderInfo.dispatchEvent(new openfl_events_Event("complete"));
+		} else openfl_display_BitmapData.loadFromBytes(loader.data).onComplete($bind(this,this.BitmapData_onLoad)).onError($bind(this,this.BitmapData_onError));
+	}
+	,loader_onError: function(event) {
 		event.target = this.contentLoaderInfo;
-		event.currentTarget = this.contentLoaderInfo;
+		this.contentLoaderInfo.dispatchEvent(event);
+	}
+	,loader_onProgress: function(event) {
+		event.target = this.contentLoaderInfo;
 		this.contentLoaderInfo.dispatchEvent(event);
 	}
 	,__class__: openfl_display_Loader
@@ -35324,7 +35637,6 @@ openfl_display_Stage3D.prototype = $extend(openfl_events_EventDispatcher.prototy
 		if(this.context3D != null) {
 			this.__resetContext3DStates();
 			if(this.context3D != null) {
-				renderSession.gl.depthMask(true);
 				renderSession.blendModeManager.setBlendMode(null);
 				if(renderSession.shaderManager.currentShader != null) {
 					renderSession.shaderManager.setShader(null);
@@ -35573,6 +35885,11 @@ var openfl_display3D_Context3D = function(stage3D,renderSession) {
 	this.__stencilRef = 0;
 	this.__stencilReadMask = 255;
 	this.__supportsPackedDepthStencil = true;
+	var anisotropicExt = lime_graphics_opengl_GL.context.getExtension("EXT_texture_filter_anisotropic");
+	if(anisotropicExt == null || Reflect.field(anisotropicExt,"MAX_TEXTURE_MAX_ANISOTROPY_EXT") == null) anisotropicExt = lime_graphics_opengl_GL.context.getExtension("MOZ_EXT_texture_filter_anisotropic");
+	if(anisotropicExt == null || Reflect.field(anisotropicExt,"MAX_TEXTURE_MAX_ANISOTROPY_EXT") == null) anisotropicExt = lime_graphics_opengl_GL.context.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+	this.__supportsAnisotropicFiltering = anisotropicExt != null;
+	if(this.__supportsAnisotropicFiltering) this.__maxAnisotropyTexture2D = this.__maxAnisotropyCubeTexture = lime_graphics_opengl_GL.context.getParameter(lime_graphics_opengl_ExtensionAnisotropicFiltering.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 	this.__stats = openfl__$Vector_Vector_$Impl_$.toIntVector(null,11);
 	this.__statsCache = openfl__$Vector_Vector_$Impl_$.toIntVector(null,11);
 	openfl__$internal_stage3D_GLUtils.CheckGLError();
@@ -35613,6 +35930,8 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 	,__fragmentConstants: null
 	,__framebuffer: null
 	,__frameCount: null
+	,__maxAnisotropyCubeTexture: null
+	,__maxAnisotropyTexture2D: null
 	,__positionScale: null
 	,__program: null
 	,__renderSession: null
@@ -35629,6 +35948,7 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 	,__stencilRef: null
 	,__stencilReadMask: null
 	,__stencilRenderBuffer: null
+	,__supportsAnisotropicFiltering: null
 	,__supportsPackedDepthStencil: null
 	,__vertexConstants: null
 	,clear: function(red,green,blue,alpha,depth,stencil,mask) {
@@ -35647,6 +35967,7 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 		}
 		if((mask & 2) != 0) {
 			clearMask |= 256;
+			lime_graphics_opengl_GL.context.depthMask(true);
 			lime_graphics_opengl_GL.context.clearDepth(depth);
 			openfl__$internal_stage3D_GLUtils.CheckGLError();
 		}
@@ -35966,6 +36287,8 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 	,setRenderToBackBuffer: function() {
 		lime_graphics_opengl_GL.context.bindFramebuffer(36160,null);
 		openfl__$internal_stage3D_GLUtils.CheckGLError();
+		lime_graphics_opengl_GL.context.frontFace(2305);
+		openfl__$internal_stage3D_GLUtils.CheckGLError();
 		this.__renderToTexture = null;
 		this.__scissorRectangle = null;
 		this.__updateBackbufferViewport();
@@ -36037,10 +36360,12 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 		this.__setViewport(0,0,width,height);
 		if(this.enableErrorChecking) {
 			var code = lime_graphics_opengl_GL.context.checkFramebufferStatus(36160);
-			if(code != 36053) haxe_Log.trace("Error: Context3D.setRenderToTexture status:${code} width:${texture2D.__width} height:${texture2D.__height}",{ fileName : "Context3D.hx", lineNumber : 726, className : "openfl.display3D.Context3D", methodName : "setRenderToTexture"});
+			if(code != 36053) haxe_Log.trace("Error: Context3D.setRenderToTexture status:${code} width:${texture2D.__width} height:${texture2D.__height}",{ fileName : "Context3D.hx", lineNumber : 747, className : "openfl.display3D.Context3D", methodName : "setRenderToTexture"});
 		}
 		this.__positionScale[1] = -1.0;
 		if(this.__program != null) this.__program.__setPositionScale(this.__positionScale);
+		lime_graphics_opengl_GL.context.frontFace(2304);
+		openfl__$internal_stage3D_GLUtils.CheckGLError();
 		this.__renderToTexture = texture;
 		this.__scissorRectangle = null;
 		this.__rttDepthAndStencil = enableDepthAndStencil;
@@ -36052,55 +36377,57 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 		var state = this.__samplerStates[sampler];
 		switch(wrap) {
 		case 0:
-			state.wrapModeS = 33071;
-			state.wrapModeT = 33071;
+			state.set_wrapModeS(33071);
+			state.set_wrapModeT(33071);
 			break;
 		case 1:
-			state.wrapModeS = 33071;
-			state.wrapModeT = 10497;
+			state.set_wrapModeS(33071);
+			state.set_wrapModeT(10497);
 			break;
 		case 2:
-			state.wrapModeS = 10497;
-			state.wrapModeT = 10497;
+			state.set_wrapModeS(10497);
+			state.set_wrapModeT(10497);
 			break;
 		case 3:
-			state.wrapModeS = 10497;
-			state.wrapModeT = 33071;
+			state.set_wrapModeS(10497);
+			state.set_wrapModeT(33071);
 			break;
 		default:
 			throw new js__$Boot_HaxeError(new openfl_errors_Error("wrap bad enum"));
 		}
 		switch(filter) {
 		case 4:
-			state.magFilter = 9729;
+			state.set_magFilter(9729);
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(1);
 			break;
 		case 5:
-			state.magFilter = 9728;
+			state.set_magFilter(9728);
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(1);
 			break;
 		case 1:
-			state.magFilter = 9729;
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(this.__maxAnisotropyTexture2D < 2?this.__maxAnisotropyTexture2D:2);
 			break;
 		case 2:
-			state.magFilter = 9729;
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(this.__maxAnisotropyTexture2D < 4?this.__maxAnisotropyTexture2D:4);
 			break;
 		case 3:
-			state.magFilter = 9729;
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(this.__maxAnisotropyTexture2D < 8?this.__maxAnisotropyTexture2D:8);
 			break;
 		case 0:
-			state.magFilter = 9729;
+			if(this.__supportsAnisotropicFiltering) state.set_maxAniso(this.__maxAnisotropyTexture2D < 16?this.__maxAnisotropyTexture2D:16);
 			break;
 		default:
 			throw new js__$Boot_HaxeError(new openfl_errors_Error("filter bad enum"));
 		}
 		switch(mipfilter) {
 		case 0:
-			state.minFilter = 9987;
+			state.set_minFilter(9987);
 			break;
 		case 1:
-			state.minFilter = 9984;
+			state.set_minFilter(9984);
 			break;
 		case 2:
-			if(filter == 5) state.minFilter = 9728; else state.minFilter = 9729;
+			state.set_minFilter(filter == 5?9728:9729);
 			break;
 		default:
 			throw new js__$Boot_HaxeError(new openfl_errors_Error("mipfiter bad enum"));
@@ -36250,6 +36577,7 @@ openfl_display3D_Context3D.prototype = $extend(openfl_events_EventDispatcher.pro
 		}(this)) != -1;
 	}
 	,__setViewport: function(originX,originY,width,height) {
+		if(this.__renderToTexture != null) originY *= -1;
 		if(openfl_display3D_Context3D.__stateCache.updateViewport(originX,originY,width,height)) {
 			lime_graphics_opengl_GL.context.viewport(originX,originY,width,height);
 			openfl__$internal_stage3D_GLUtils.CheckGLError();
@@ -37109,7 +37437,7 @@ openfl_display3D_Program3D.prototype = {
 		}
 		lime_graphics_opengl_GL.context.linkProgram(this.__programID);
 		var infoLog = lime_graphics_opengl_GL.context.getProgramInfoLog(this.__programID);
-		if(infoLog != null && infoLog.length != 0) haxe_Log.trace("program: ${infoLog}",{ fileName : "Program3D.hx", lineNumber : 359, className : "openfl.display3D.Program3D", methodName : "__uploadFromGLSL"});
+		if(infoLog != null && infoLog.length != 0) haxe_Log.trace("program: " + infoLog,{ fileName : "Program3D.hx", lineNumber : 359, className : "openfl.display3D.Program3D", methodName : "__uploadFromGLSL"});
 		this.__buildUniformList();
 		this.__memUsage = 1;
 		this.__context.__statsIncrement(5);
@@ -37385,6 +37713,17 @@ openfl_display3D_textures_TextureBase.prototype = $extend(openfl_events_EventDis
 			this.__memoryUsage = 0;
 		}
 	}
+	,__getATFVersion: function(data) {
+		var signature = data.readUTFBytes(3);
+		if(signature != "ATF") throw new js__$Boot_HaxeError(new openfl_errors_IllegalOperationError("ATF signature not found"));
+		var position = data.position;
+		var version = 0;
+		if(_$UInt_UInt_$Impl_$.gte(data.length - data.position,5)) {
+			var sig = this.__readUInt32(data);
+			if(sig == 255) version = data.readUnsignedByte(); else data.position = position;
+		}
+		return version;
+	}
 	,__getImage: function(bitmapData) {
 		var image = bitmapData.image;
 		if(!bitmapData.__isValid || image == null) return null;
@@ -37404,6 +37743,26 @@ openfl_display3D_textures_TextureBase.prototype = $extend(openfl_events_EventDis
 	,__getTexture: function() {
 		return this.__textureID;
 	}
+	,__readUInt24: function(data) {
+		var value;
+		value = data.readUnsignedByte() << 16;
+		var b = data.readUnsignedByte() << 8;
+		value = value | b;
+		var b1 = data.readUnsignedByte();
+		value = value | b1;
+		return value;
+	}
+	,__readUInt32: function(data) {
+		var value;
+		value = data.readUnsignedByte() << 24;
+		var b = data.readUnsignedByte() << 16;
+		value = value | b;
+		var b1 = data.readUnsignedByte() << 8;
+		value = value | b1;
+		var b2 = data.readUnsignedByte();
+		value = value | b2;
+		return value;
+	}
 	,__setSamplerState: function(state) {
 		if(!state.equals(this.__samplerState)) {
 			lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,this.__textureID);
@@ -37419,6 +37778,7 @@ openfl_display3D_textures_TextureBase.prototype = $extend(openfl_events_EventDis
 			if(state.lodBias != 0.0) {
 			}
 			this.__samplerState = state;
+			this.__samplerState.__samplerDirty = false;
 		}
 	}
 	,__trackCompressedMemoryUsage: function(memory) {
@@ -37449,11 +37809,53 @@ openfl_display3D_textures_CubeTexture.prototype = $extend(openfl_display3D_textu
 	,__uploadedSides: null
 	,uploadCompressedTextureFromByteArray: function(data,byteArrayOffset,async) {
 		if(async == null) async = false;
+		var _g = this;
+		data.position = byteArrayOffset;
+		var signature = data.readUTFBytes(3);
+		data.position = byteArrayOffset;
+		if(signature == "ATF") {
+			lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,this.__textureID);
+			openfl__$internal_stage3D_GLUtils.CheckGLError();
+			this.__uploadATFTextureFromByteArray(data,byteArrayOffset);
+			lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,null);
+			openfl__$internal_stage3D_GLUtils.CheckGLError();
+		} else {
+			lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,null);
+			openfl__$internal_stage3D_GLUtils.CheckGLError();
+		}
+		if(async) haxe_Timer.delay(function() {
+			_g.dispatchEvent(new openfl_events_Event("textureReady"));
+		},1);
 	}
 	,uploadFromBitmapData: function(source,side,miplevel,generateMipmap) {
 		if(generateMipmap == null) generateMipmap = false;
 		if(miplevel == null) miplevel = 0;
-		lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,this.__textureID);
+		if(source == null) return;
+		var size = this.__size >> miplevel;
+		if(size == 0) return;
+		var image = this.__getImage(source);
+		this.uploadFromTypedArray(image.get_data(),side,miplevel);
+	}
+	,uploadFromByteArray: function(data,byteArrayOffset,side,miplevel) {
+		if(miplevel == null) miplevel = 0;
+		if(byteArrayOffset == 0) {
+			this.uploadFromTypedArray(data.b,side);
+			return;
+		}
+		this.uploadFromTypedArray((function($this) {
+			var $r;
+			var buffer = openfl_utils__$ByteArray_ByteArray_$Impl_$.toArrayBuffer(data);
+			var this1;
+			if(buffer != null) this1 = new Uint8Array(buffer,byteArrayOffset); else this1 = null;
+			$r = this1;
+			return $r;
+		}(this)),side,miplevel);
+	}
+	,uploadFromTypedArray: function(data,side,miplevel) {
+		if(miplevel == null) miplevel = 0;
+		if(data == null) return;
+		var size = this.__size >> miplevel;
+		if(size == 0) return;
 		var target;
 		switch(side) {
 		case 0:
@@ -37477,11 +37879,31 @@ openfl_display3D_textures_CubeTexture.prototype = $extend(openfl_display3D_textu
 		default:
 			throw new js__$Boot_HaxeError(new openfl_errors_IllegalOperationError());
 		}
-		this.__uploadedSides |= 1 << side;
+		lime_graphics_opengl_GL.context.bindTexture(34067,this.__textureID);
+		openfl__$internal_stage3D_GLUtils.CheckGLError();
+		lime_graphics_opengl_GL.context.texImage2D(target,miplevel,this.__internalFormat,size,size,0,this.__format,5121,data);
+		openfl__$internal_stage3D_GLUtils.CheckGLError();
 		lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,null);
+		openfl__$internal_stage3D_GLUtils.CheckGLError();
+		this.__uploadedSides |= 1 << side;
+		var memUsage = this.__size * this.__size * 4;
+		this.__trackMemoryUsage(memUsage);
 	}
-	,uploadFromByteArray: function(data,byteArrayOffset,side,miplevel) {
-		if(miplevel == null) miplevel = 0;
+	,__setSamplerState: function(state) {
+		if(!state.equals(this.__samplerState)) {
+			if((state.minFilter == 9987 || state.minFilter == 9984) && !state.mipmapGenerated) {
+				lime_graphics_opengl_GL.context.generateMipmap(34067);
+				openfl__$internal_stage3D_GLUtils.CheckGLError();
+				state.mipmapGenerated = true;
+			}
+			if(state.maxAniso != 0.0) {
+				lime_graphics_opengl_GL.context.texParameterf(34067,lime_graphics_opengl_ExtensionAnisotropicFiltering.TEXTURE_MAX_ANISOTROPY_EXT,state.maxAniso);
+				openfl__$internal_stage3D_GLUtils.CheckGLError();
+			}
+		}
+		openfl_display3D_textures_TextureBase.prototype.__setSamplerState.call(this,state);
+	}
+	,__uploadATFTextureFromByteArray: function(data,byteArrayOffset) {
 	}
 	,__class__: openfl_display3D_textures_CubeTexture
 });
@@ -37526,6 +37948,15 @@ openfl_display3D_textures_RectangleTexture.prototype = $extend(openfl_display3D_
 		var memUsage = this.__width * this.__height * 4;
 		this.__trackMemoryUsage(memUsage);
 	}
+	,__setSamplerState: function(state) {
+		if(!state.equals(this.__samplerState)) {
+			if(state.maxAniso != 0.0) {
+				lime_graphics_opengl_GL.context.texParameterf(3553,lime_graphics_opengl_ExtensionAnisotropicFiltering.TEXTURE_MAX_ANISOTROPY_EXT,state.maxAniso);
+				openfl__$internal_stage3D_GLUtils.CheckGLError();
+			}
+		}
+		openfl_display3D_textures_TextureBase.prototype.__setSamplerState.call(this,state);
+	}
 	,__class__: openfl_display3D_textures_RectangleTexture
 });
 var openfl_display3D_textures_Texture = function(context,width,height,format,optimizeForRenderToTexture,streamingLevels) {
@@ -37543,37 +37974,6 @@ var openfl_display3D_textures_Texture = function(context,width,height,format,opt
 };
 $hxClasses["openfl.display3D.textures.Texture"] = openfl_display3D_textures_Texture;
 openfl_display3D_textures_Texture.__name__ = ["openfl","display3D","textures","Texture"];
-openfl_display3D_textures_Texture.__getATFVersion = function(data) {
-	var signature = data.readUTFBytes(3);
-	if(signature != "ATF") throw new js__$Boot_HaxeError(new openfl_errors_IllegalOperationError("ATF signature not found"));
-	var position = data.position;
-	var version = 0;
-	if(_$UInt_UInt_$Impl_$.gte(data.length - data.position,5)) {
-		var sig = openfl_display3D_textures_Texture.__readUInt32(data);
-		if(sig == 255) version = data.readUnsignedByte(); else data.position = position;
-	}
-	return version;
-};
-openfl_display3D_textures_Texture.__readUInt24 = function(data) {
-	var value;
-	value = data.readUnsignedByte() << 16;
-	var b = data.readUnsignedByte() << 8;
-	value = value | b;
-	var b1 = data.readUnsignedByte();
-	value = value | b1;
-	return value;
-};
-openfl_display3D_textures_Texture.__readUInt32 = function(data) {
-	var value;
-	value = data.readUnsignedByte() << 24;
-	var b = data.readUnsignedByte() << 16;
-	value = value | b;
-	var b1 = data.readUnsignedByte() << 8;
-	value = value | b1;
-	var b2 = data.readUnsignedByte();
-	value = value | b2;
-	return value;
-};
 openfl_display3D_textures_Texture.__super__ = openfl_display3D_textures_TextureBase;
 openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_TextureBase.prototype,{
 	uploadCompressedTextureFromByteArray: function(data,byteArrayOffset,async) {
@@ -37602,6 +38002,9 @@ openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_
 		if(source == null) return;
 		var width = this.__width >> miplevel;
 		var height = this.__height >> miplevel;
+		if(width == 0 && height == 0) return;
+		if(width == 0) width = 1;
+		if(height == 0) height = 1;
 		if(source.width != width || source.height != height) {
 			var copy = new openfl_display_BitmapData(width,height,true,0);
 			copy.draw(source);
@@ -37613,7 +38016,7 @@ openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_
 	,uploadFromByteArray: function(data,byteArrayOffset,miplevel) {
 		if(miplevel == null) miplevel = 0;
 		if(byteArrayOffset == 0) {
-			this.uploadFromTypedArray(data.b);
+			this.uploadFromTypedArray(data.b,miplevel);
 			return;
 		}
 		this.uploadFromTypedArray((function($this) {
@@ -37630,6 +38033,9 @@ openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_
 		if(data == null) return;
 		var width = this.__width >> miplevel;
 		var height = this.__height >> miplevel;
+		if(width == 0 && height == 0) return;
+		if(width == 0) width = 1;
+		if(height == 0) height = 1;
 		lime_graphics_opengl_GL.context.bindTexture(this.__textureTarget,this.__textureID);
 		openfl__$internal_stage3D_GLUtils.CheckGLError();
 		lime_graphics_opengl_GL.context.texImage2D(this.__textureTarget,miplevel,this.__internalFormat,width,height,0,this.__format,5121,data);
@@ -37639,11 +38045,25 @@ openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_
 		var memUsage = width * height * 4;
 		this.__trackMemoryUsage(memUsage);
 	}
+	,__setSamplerState: function(state) {
+		if(!state.equals(this.__samplerState)) {
+			if((state.minFilter == 9987 || state.minFilter == 9984) && !state.mipmapGenerated) {
+				lime_graphics_opengl_GL.context.generateMipmap(3553);
+				openfl__$internal_stage3D_GLUtils.CheckGLError();
+				state.mipmapGenerated = true;
+			}
+			if(state.maxAniso != 0.0) {
+				lime_graphics_opengl_GL.context.texParameterf(3553,lime_graphics_opengl_ExtensionAnisotropicFiltering.TEXTURE_MAX_ANISOTROPY_EXT,state.maxAniso);
+				openfl__$internal_stage3D_GLUtils.CheckGLError();
+			}
+		}
+		openfl_display3D_textures_TextureBase.prototype.__setSamplerState.call(this,state);
+	}
 	,__uploadATFTextureFromByteArray: function(data,byteArrayOffset) {
 		data.position = byteArrayOffset;
-		var version = openfl_display3D_textures_Texture.__getATFVersion(data);
+		var version = this.__getATFVersion(data);
 		var length;
-		if(version == 0) length = openfl_display3D_textures_Texture.__readUInt24(data); else length = openfl_display3D_textures_Texture.__readUInt32(data);
+		if(version == 0) length = this.__readUInt24(data); else length = this.__readUInt32(data);
 		if(js_Boot.__cast(byteArrayOffset + length , Int) > openfl_utils__$ByteArray_ByteArray_$Impl_$.get_length(data)) throw new js__$Boot_HaxeError(new openfl_errors_IllegalOperationError("ATF length exceeds byte array length"));
 		var tdata = data.readUnsignedByte();
 		var type = tdata >> 7;
@@ -37659,7 +38079,7 @@ openfl_display3D_textures_Texture.prototype = $extend(openfl_display3D_textures_
 			while(_g1 < 3) {
 				var gpuFormat = _g1++;
 				var blockLength;
-				if(version == 0) blockLength = openfl_display3D_textures_Texture.__readUInt24(data); else blockLength = openfl_display3D_textures_Texture.__readUInt32(data);
+				if(version == 0) blockLength = this.__readUInt24(data); else blockLength = this.__readUInt32(data);
 				if(_$UInt_UInt_$Impl_$.gt(blockLength,0)) {
 					if(gpuFormat == 1) {
 					} else if(gpuFormat == 2) {
@@ -38931,12 +39351,36 @@ openfl_media_Sound.prototype = $extend(openfl_events_EventDispatcher.prototype,{
 	}
 	,loadCompressedDataFromByteArray: function(bytes,bytesLength,forcePlayAsMusic) {
 		if(forcePlayAsMusic == null) forcePlayAsMusic = false;
+		if(bytes == null || bytesLength <= 0) {
+			this.dispatchEvent(new openfl_events_IOErrorEvent("ioError"));
+			return;
+		}
+		if(openfl_utils__$ByteArray_ByteArray_$Impl_$.get_length(bytes) > bytesLength) {
+			var copy = new openfl_utils_ByteArrayData(bytesLength);
+			copy.writeBytes(bytes,0,bytesLength);
+			bytes = copy;
+		}
 		this.__buffer = lime_media_AudioBuffer.fromBytes(openfl_utils__$ByteArray_ByteArray_$Impl_$.toBytes(bytes));
+		if(this.__buffer == null) this.dispatchEvent(new openfl_events_IOErrorEvent("ioError")); else this.dispatchEvent(new openfl_events_Event("complete"));
 	}
 	,loadPCMFromByteArray: function(bytes,samples,format,stereo,sampleRate) {
 		if(sampleRate == null) sampleRate = 44100;
 		if(stereo == null) stereo = true;
-		this.__buffer = lime_media_AudioBuffer.fromBytes(openfl_utils__$ByteArray_ByteArray_$Impl_$.toBytes(bytes));
+		if(format == null) format = "float";
+		if(bytes == null) {
+			this.dispatchEvent(new openfl_events_IOErrorEvent("ioError"));
+			return;
+		}
+		var audioBuffer = new lime_media_AudioBuffer();
+		if(format == "float") audioBuffer.bitsPerSample = 16; else audioBuffer.bitsPerSample = 8;
+		if(stereo) audioBuffer.channels = 2; else audioBuffer.channels = 1;
+		var buffer = openfl_utils__$ByteArray_ByteArray_$Impl_$.toArrayBuffer(bytes);
+		var this1;
+		if(buffer != null) this1 = new Uint8Array(buffer,0); else this1 = null;
+		audioBuffer.data = this1;
+		audioBuffer.sampleRate = sampleRate | 0;
+		this.__buffer = audioBuffer;
+		this.dispatchEvent(new openfl_events_Event("complete"));
 	}
 	,play: function(startTime,loops,sndTransform) {
 		if(loops == null) loops = 0;
@@ -39554,7 +39998,7 @@ openfl_system_Capabilities.get_screenResolutionY = function() {
 };
 openfl_system_Capabilities.get_version = function() {
 	var value = "WEB";
-	value += " " + StringTools.replace("4.7.3",".",",") + ",0";
+	value += " " + StringTools.replace("4.8.1",".",",") + ",0";
 	return value;
 };
 var openfl_system_LoaderContext = function(checkPolicyFile,applicationDomain,securityDomain) {
@@ -39827,6 +40271,7 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 	,__showCursor: null
 	,__symbol: null
 	,__text: null
+	,__htmlText: null
 	,__textEngine: null
 	,__textFormat: null
 	,__div: null
@@ -40097,6 +40542,7 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 			beginIndex = 0;
 			endIndex = max;
 		} else if(endIndex < 0) endIndex = beginIndex + 1;
+		if(endIndex == 0) endIndex = beginIndex + 1;
 		if(endIndex > max) endIndex = max;
 		if(endIndex < beginIndex) return;
 		if(beginIndex == 0 && endIndex == max) {
@@ -40116,7 +40562,8 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 				index--;
 				range = this.__textEngine.textFormatRanges.get(index);
 				if(range.start == beginIndex && range.end == endIndex) {
-					range.format = format.clone();
+					range.format = openfl_text_TextField.__defaultTextFormat.clone();
+					range.format.__merge(format);
 					return;
 				}
 				if(range.start > beginIndex && range.end < endIndex) {
@@ -40143,7 +40590,7 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 				this.__textEngine.textFormatRanges.push(nextRange);
 			}
 			if(prevRange != null) {
-				prevRange.end = beginIndex - 1;
+				prevRange.end = beginIndex;
 				if(prevRange.end <= prevRange.start) {
 					searchIndex = this.__textEngine.textFormatRanges.indexOf(prevRange,0);
 					if(searchIndex > -1) this.__textEngine.textFormatRanges.splice(searchIndex,1);
@@ -40151,14 +40598,16 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 				}
 			}
 			if(nextRange != null) {
-				nextRange.start = endIndex + 1;
+				nextRange.start = endIndex;
 				if(nextRange.start >= nextRange.end) {
 					searchIndex = this.__textEngine.textFormatRanges.indexOf(nextRange,0);
 					if(searchIndex > -1) this.__textEngine.textFormatRanges.splice(searchIndex,1);
 					nextRange = null;
 				}
 			}
-			var x = new openfl__$internal_text_TextFormatRange(format.clone(),beginIndex,endIndex);
+			var textFormat = openfl_text_TextField.__defaultTextFormat.clone();
+			textFormat.__merge(format);
+			var x = new openfl__$internal_text_TextFormatRange(textFormat,beginIndex,endIndex);
 			this.__textEngine.textFormatRanges.push(x);
 			this.__textEngine.textFormatRanges.sort(function(a,b) {
 				if(a.start < b.start || a.end < b.end) return -1; else if(a.start > b.start || a.end > b.end) return 1;
@@ -40195,6 +40644,19 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 			if(caretIndex == null) caretIndex = this.__caretIndex;
 			this.__caretIndex = this.__getCharIndexOnDifferentLine(caretIndex,lineIndex - 1);
 		} else this.__caretIndex = 0;
+	}
+	,__dispatch: function(event) {
+		if(event.eventPhase == 2 && event.type == "mouseUp") {
+			var event1 = event;
+			var group = this.__getGroup(this.get_mouseX(),this.get_mouseY(),true);
+			if(group != null) {
+				var url = group.format.url;
+				if(url != "") {
+					if(StringTools.startsWith(url,"event:")) this.dispatchEvent(new openfl_events_TextEvent("link",false,false,HxOverrides.substr(url,6,null))); else openfl_Lib.getURL(new openfl_net_URLRequest(url));
+				}
+			}
+		}
+		return openfl_display_InteractiveObject.prototype.__dispatch.call(this,event);
 	}
 	,__fromSymbol: function(swf,symbol) {
 		this.__symbol = symbol;
@@ -40236,7 +40698,7 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 				}
 			}
 		}
-		if(found) this.set_embedFonts(true); else lime_utils_Log.warn("Could not find required font \"" + format.font + "\", it has not been embedded",{ fileName : "TextField.hx", lineNumber : 926, className : "openfl.text.TextField", methodName : "__fromSymbol"});
+		if(found) this.set_embedFonts(true); else lime_utils_Log.warn("Could not find required font \"" + format.font + "\", it has not been embedded",{ fileName : "TextField.hx", lineNumber : 975, className : "openfl.text.TextField", methodName : "__fromSymbol"});
 		if(symbol.align != null) {
 			if(symbol.align == "center") format.align = 0; else if(symbol.align == "right") format.align = 4; else if(symbol.align == "justify") format.align = 2;
 			format.leftMargin = symbol.leftMargin / 20 | 0;
@@ -40290,9 +40752,12 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 		return -1;
 	}
 	,__getCursor: function() {
-		if(this.__textEngine.selectable) return lime_ui_MouseCursor.TEXT; else return null;
+		var group = this.__getGroup(this.get_mouseX(),this.get_mouseY(),true);
+		if(group != null && group.format.url != "") return lime_ui_MouseCursor.POINTER; else if(this.__textEngine.selectable) return lime_ui_MouseCursor.TEXT;
+		return null;
 	}
-	,__getPosition: function(x,y) {
+	,__getGroup: function(x,y,precise) {
+		if(precise == null) precise = false;
 		this.__updateLayout();
 		x += this.get_scrollH();
 		var _g1 = 0;
@@ -40301,7 +40766,7 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 			var i = _g1++;
 			y += this.__textEngine.lineHeights.get(i);
 		}
-		if(y > this.__textEngine.textHeight) y = this.__textEngine.textHeight;
+		if(!precise && y > this.__textEngine.textHeight) y = this.__textEngine.textHeight;
 		var firstGroup = true;
 		var group;
 		var nextGroup;
@@ -40316,23 +40781,26 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 				if(x < group.offsetX) x = group.offsetX;
 				firstGroup = false;
 			}
-			if(y >= group.offsetY && y <= group.offsetY + group.height || nextGroup == null) {
-				if(x >= group.offsetX && x <= group.offsetX + group.width || (nextGroup == null || nextGroup.lineIndex != group.lineIndex)) {
-					var advance = 0.0;
-					var _g3 = 0;
-					var _g21 = group.advances.length;
-					while(_g3 < _g21) {
-						var i2 = _g3++;
-						advance += group.advances[i2];
-						if(x <= group.offsetX + advance) {
-							if(x <= group.offsetX + (advance - group.advances[i2]) + group.advances[i2] / 2) return group.startIndex + i2; else if(group.startIndex + i2 < group.endIndex) return group.startIndex + i2 + 1; else return group.endIndex;
-						}
-					}
-					return group.endIndex;
-				}
+			if(y >= group.offsetY && y <= group.offsetY + group.height || !precise && nextGroup == null) {
+				if(x >= group.offsetX && x <= group.offsetX + group.width || !precise && (nextGroup == null || nextGroup.lineIndex != group.lineIndex)) return group;
 			}
 		}
-		return this.__text.length;
+		return null;
+	}
+	,__getPosition: function(x,y) {
+		var group = this.__getGroup(x,y);
+		if(group == null) return this.__text.length;
+		var advance = 0.0;
+		var _g1 = 0;
+		var _g = group.advances.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			advance += group.advances[i];
+			if(x <= group.offsetX + advance) {
+				if(x <= group.offsetX + (advance - group.advances[i]) + group.advances[i] / 2) return group.startIndex + i; else if(group.startIndex + i < group.endIndex) return group.startIndex + i + 1; else return group.endIndex;
+			}
+		}
+		return group.endIndex;
 	}
 	,__hitTest: function(x,y,shapeFlag,stack,interactiveOnly,hitObject) {
 		if(!hitObject.get_visible() || this.__isMask || interactiveOnly && !this.mouseEnabled) return false;
@@ -40643,6 +41111,9 @@ openfl_text_TextField.prototype = $extend(openfl_display_InteractiveObject.proto
 						if(tagEndIndex > -1) {
 							var _g11 = tagName.toLowerCase();
 							switch(_g11) {
+							case "a":
+								if(openfl_text_TextField.__regexHref.match(segment1)) format.url = this.__getAttributeMatch(openfl_text_TextField.__regexHref);
+								break;
 							case "p":
 								if(this.__textEngine.textFormatRanges.get_length() > 0 && !noLineBreak) value += "\n";
 								if(openfl_text_TextField.__regexAlign.match(segment1)) format.align = openfl_text__$TextFormatAlign_TextFormatAlign_$Impl_$.fromString(this.__getAttributeMatch(openfl_text_TextField.__regexAlign).toLowerCase());
@@ -42336,8 +42807,8 @@ openfl_utils_AGALMiniAssembler.prototype = {
 				if(isRelative) idxmatch = this.match(relreg[0],reg7); else idxmatch = this.match(regs[j1],reg7);
 				var regidx = 0;
 				if(idxmatch.length > 0) regidx = Std.parseInt(idxmatch[0]);
-				if(regFound.range < regidx) {
-					this.error = "error: register operand " + j1 + " (" + regs[j1] + ") index exceeds limit of " + (regFound.range + 1) + ".";
+				if(_$UInt_UInt_$Impl_$.gt(regidx,regFound.range)) {
+					this.error = "error: register operand " + j1 + " (" + regs[j1] + ") index exceeds limit of " + Std.string(_$UInt_UInt_$Impl_$.toFloat(regFound.range + 1)) + ".";
 					badreg = true;
 					break;
 				}
@@ -42357,19 +42828,16 @@ openfl_utils_AGALMiniAssembler.prototype = {
 					regmask = 0;
 					var cv = 0;
 					var maskLength = maskmatch[0].length;
-					var _g1 = 1;
-					while(_g1 < maskLength) {
-						var k = _g1++;
+					var k = 1;
+					while(k < maskLength) {
 						cv = HxOverrides.cca(maskmatch[0],k) - 120;
-						if(cv > 2) cv = 3;
-						if(isDest) regmask |= 1 << cv; else regmask |= cv << (k - 1 << 1);
+						if(_$UInt_UInt_$Impl_$.gt(cv,2)) cv = 3;
+						if(isDest) regmask |= 1 << cv; else regmask = regmask | cv << (k - 1 << 1);
+						k++;
 					}
-					if(!isDest) {
-						var k1 = maskLength - 1;
-						while(k1 <= 4) {
-							regmask |= cv << (k1 - 1 << 1);
-							k1++;
-						}
+					if(!isDest) while(k <= 4) {
+						regmask = regmask | cv << (k - 1 << 1);
+						k++;
 					}
 				} else if(isDest) regmask = 15; else regmask = 228;
 				if(isRelative) {
@@ -42388,7 +42856,7 @@ openfl_utils_AGALMiniAssembler.prototype = {
 						break;
 					}
 					relsel = HxOverrides.cca(selmatch[0],1) - 120;
-					if(relsel > 2) relsel = 3;
+					if(_$UInt_UInt_$Impl_$.gt(relsel,2)) relsel = 3;
 					var relofs = this.match(relreg[0],reg11);
 					if(relofs.length > 0) reloffset = Std.parseInt(relofs[0]);
 					if(reloffset < 0 || reloffset > 255) {
@@ -42396,38 +42864,38 @@ openfl_utils_AGALMiniAssembler.prototype = {
 						badreg = true;
 						break;
 					}
-					if(this.verbose) haxe_Log.trace("RELATIVE: type=" + reltype + "==" + relname[0] + " sel=" + relsel + "==" + selmatch[0] + " idx=" + regidx + " offset=" + reloffset,{ fileName : "AGALMiniAssembler.hx", lineNumber : 568, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+					if(this.verbose) haxe_Log.trace("RELATIVE: type=" + reltype + "==" + relname[0] + " sel=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(relsel)) + "==" + selmatch[0] + " idx=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(regidx)) + " offset=" + reloffset,{ fileName : "AGALMiniAssembler.hx", lineNumber : 569, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 				}
-				if(this.verbose) haxe_Log.trace("  emit argcode=" + Std.string(regFound) + "[" + regidx + "][" + regmask + "]",{ fileName : "AGALMiniAssembler.hx", lineNumber : 576, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+				if(this.verbose) haxe_Log.trace("  emit argcode=" + Std.string(regFound) + "[" + Std.string(_$UInt_UInt_$Impl_$.toFloat(regidx)) + "][" + regmask + "]",{ fileName : "AGALMiniAssembler.hx", lineNumber : 577, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 				if(isDest) {
 					this.agalcode.writeShort(regidx);
 					this.agalcode.writeByte(regmask);
 					this.agalcode.writeByte(regFound.emitCode);
 					pad -= 32;
 				} else if(isSampler) {
-					if(this.verbose) haxe_Log.trace("  emit sampler",{ fileName : "AGALMiniAssembler.hx", lineNumber : 593, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+					if(this.verbose) haxe_Log.trace("  emit sampler",{ fileName : "AGALMiniAssembler.hx", lineNumber : 594, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 					var samplerbits = 5;
 					var optsLength;
 					if(opts == null) optsLength = 0; else optsLength = opts.length;
 					var bias = 0.0;
-					var _g11 = 0;
-					while(_g11 < optsLength) {
-						var k2 = _g11++;
-						if(this.verbose) haxe_Log.trace("    opt: " + opts[k2],{ fileName : "AGALMiniAssembler.hx", lineNumber : 605, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
-						var optfound = openfl_utils_AGALMiniAssembler.SAMPLEMAP.get(opts[k2]);
+					var _g1 = 0;
+					while(_g1 < optsLength) {
+						var k1 = _g1++;
+						if(this.verbose) haxe_Log.trace("    opt: " + opts[k1],{ fileName : "AGALMiniAssembler.hx", lineNumber : 606, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+						var optfound = openfl_utils_AGALMiniAssembler.SAMPLEMAP.get(opts[k1]);
 						if(optfound == null) {
-							bias = parseFloat(opts[k2]);
-							if(this.verbose) haxe_Log.trace("    bias: " + bias,{ fileName : "AGALMiniAssembler.hx", lineNumber : 619, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+							bias = parseFloat(opts[k1]);
+							if(this.verbose) haxe_Log.trace("    bias: " + bias,{ fileName : "AGALMiniAssembler.hx", lineNumber : 620, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 						} else {
 							if(optfound.flag != 16) samplerbits &= ~(15 << optfound.flag);
-							samplerbits |= optfound.mask << optfound.flag;
+							samplerbits = samplerbits | optfound.mask << optfound.flag;
 						}
 					}
 					this.agalcode.writeShort(regidx);
 					this.agalcode.writeByte(bias * 8.0 | 0);
 					this.agalcode.writeByte(0);
 					this.agalcode.writeUnsignedInt(samplerbits);
-					if(this.verbose) haxe_Log.trace("    bits: " + (samplerbits - 5),{ fileName : "AGALMiniAssembler.hx", lineNumber : 644, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+					if(this.verbose) haxe_Log.trace("    bits: " + (samplerbits - 5),{ fileName : "AGALMiniAssembler.hx", lineNumber : 645, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 					pad -= 64;
 				} else {
 					if(j1 == 0) {
@@ -42454,7 +42922,7 @@ openfl_utils_AGALMiniAssembler.prototype = {
 		if(this.error != "") {
 			this.error += "\n  at line " + i + " " + lines[i];
 			openfl_utils__$ByteArray_ByteArray_$Impl_$.set_length(this.agalcode,0);
-			haxe_Log.trace(this.error,{ fileName : "AGALMiniAssembler.hx", lineNumber : 697, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+			haxe_Log.trace(this.error,{ fileName : "AGALMiniAssembler.hx", lineNumber : 698, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 		}
 		if(this.debugEnabled) {
 			var dbgLine = "generated bytecode:";
@@ -42468,9 +42936,9 @@ openfl_utils_AGALMiniAssembler.prototype = {
 				if(byteStr.length < 2) byteStr = "0" + byteStr;
 				dbgLine += byteStr;
 			}
-			haxe_Log.trace(dbgLine,{ fileName : "AGALMiniAssembler.hx", lineNumber : 733, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+			haxe_Log.trace(dbgLine,{ fileName : "AGALMiniAssembler.hx", lineNumber : 734, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 		}
-		if(this.verbose) haxe_Log.trace("AGALMiniAssembler.assemble time: " + (openfl_Lib.getTimer() - start) / 1000 + "s",{ fileName : "AGALMiniAssembler.hx", lineNumber : 739, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
+		if(this.verbose) haxe_Log.trace("AGALMiniAssembler.assemble time: " + (openfl_Lib.getTimer() - start) / 1000 + "s",{ fileName : "AGALMiniAssembler.hx", lineNumber : 740, className : "openfl.utils.AGALMiniAssembler", methodName : "assemble"});
 		return this.agalcode;
 	}
 	,initregmap: function(version,ignorelimits) {
@@ -42573,7 +43041,7 @@ openfl_utils__$AGALMiniAssembler_Register.prototype = {
 	,flags: null
 	,range: null
 	,toString: function() {
-		return "[Register name=\"" + this.name + "\", longName=\"" + this.longName + "\", emitCode=" + this.emitCode + ", range=" + this.range + ", flags=" + this.flags + "]";
+		return "[Register name=\"" + this.name + "\", longName=\"" + this.longName + "\", emitCode=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(this.emitCode)) + ", range=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(this.range)) + ", flags=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(this.flags)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Register
 };
@@ -42589,7 +43057,7 @@ openfl_utils__$AGALMiniAssembler_Sampler.prototype = {
 	,mask: null
 	,name: null
 	,toString: function() {
-		return "[Sampler name=\"" + this.name + "\", flag=\"" + this.flag + "\", mask=" + this.mask + "]";
+		return "[Sampler name=\"" + this.name + "\", flag=\"" + Std.string(_$UInt_UInt_$Impl_$.toFloat(this.flag)) + "\", mask=" + Std.string(_$UInt_UInt_$Impl_$.toFloat(this.mask)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Sampler
 };
@@ -43010,6 +43478,9 @@ openfl_utils__$Dictionary_Dictionary_$Impl_$.set = function(this1,key,value) {
 };
 openfl_utils__$Dictionary_Dictionary_$Impl_$.iterator = function(this1) {
 	return this1.keys();
+};
+openfl_utils__$Dictionary_Dictionary_$Impl_$.each = function(this1) {
+	return this1.iterator();
 };
 openfl_utils__$Dictionary_Dictionary_$Impl_$.toStringMap = function(t,weakKeys) {
 	return new haxe_ds_StringMap();
@@ -57390,17 +57861,20 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
-com_etamin_first_AppConfig.__meta__ = { fields : { context : { inject : null}, commandMap : { inject : null}, mediatorMap : { inject : null}, stack : { inject : null}, renderer : { inject : null}, contextView : { inject : null}}};
-com_etamin_first_AppConfig.__rtti = "<class path=\"com.etamin.first.AppConfig\" params=\"\">\n\t<implements path=\"robotlegs.bender.framework.api.IConfig\"/>\n\t<context public=\"1\">\n\t\t<c path=\"robotlegs.bender.framework.api.IContext\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</context>\n\t<commandMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.signalCommandMap.api.ISignalCommandMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</commandMap>\n\t<mediatorMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.mediatorMap.api.IMediatorMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</mediatorMap>\n\t<stack public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IStack\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</stack>\n\t<renderer public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</renderer>\n\t<contextView public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.contextView.ContextView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</contextView>\n\t<configure public=\"1\" set=\"method\" line=\"44\"><f a=\"\"><x path=\"Void\"/></f></configure>\n\t<_init set=\"method\" line=\"69\"><f a=\"\"><x path=\"Void\"/></f></_init>\n\t<new public=\"1\" set=\"method\" line=\"42\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+com_etamin_first_AppConfig.__meta__ = { fields : { context : { inject : null}, contextView : { inject : null}, commandMap : { inject : null}, mediatorMap : { inject : null}, injector : { inject : null}, stack : { inject : null}, rendererContext : { inject : null}, renderer : { inject : null}}};
+com_etamin_first_AppConfig.__rtti = "<class path=\"com.etamin.first.AppConfig\" params=\"\">\n\t<implements path=\"robotlegs.bender.framework.api.IConfig\"/>\n\t<context public=\"1\">\n\t\t<c path=\"robotlegs.bender.framework.api.IContext\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</context>\n\t<contextView public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.contextView.ContextView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</contextView>\n\t<commandMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.signalCommandMap.api.ISignalCommandMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</commandMap>\n\t<mediatorMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.mediatorMap.api.IMediatorMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</mediatorMap>\n\t<injector public=\"1\">\n\t\t<c path=\"robotlegs.bender.framework.api.IInjector\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</injector>\n\t<stack public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IStack\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</stack>\n\t<rendererContext public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</rendererContext>\n\t<renderer public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderer\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</renderer>\n\t<configure public=\"1\" set=\"method\" line=\"61\"><f a=\"\"><x path=\"Void\"/></f></configure>\n\t<_init set=\"method\" line=\"68\"><f a=\"\"><x path=\"Void\"/></f></_init>\n\t<OnContext3DReady set=\"method\" line=\"75\"><f a=\"\"><x path=\"Void\"/></f></OnContext3DReady>\n\t<mapMediators set=\"method\" line=\"82\"><f a=\"\"><x path=\"Void\"/></f></mapMediators>\n\t<initView set=\"method\" line=\"118\"><f a=\"\"><x path=\"Void\"/></f></initView>\n\t<new public=\"1\" set=\"method\" line=\"59\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_bundles_mvcs_Command.__rtti = "<class path=\"robotlegs.bender.bundles.mvcs.Command\" params=\"\">\n\t<implements path=\"robotlegs.bender.extensions.commandCenter.api.ICommand\"/>\n\t<execute public=\"1\" set=\"method\" line=\"31\"><f a=\"\"><x path=\"Void\"/></f></execute>\n\t<meta>\n\t\t<m n=\":keepSub\"/>\n\t\t<m n=\":rtti\"/>\n\t</meta>\n</class>";
+com_etamin_first_commands_ExampleCommand.__rtti = "<class path=\"com.etamin.first.commands.ExampleCommand\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Command\"/>\n\t<execute public=\"1\" set=\"method\" line=\"16\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></execute>\n\t<new public=\"1\" set=\"method\" line=\"14\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 com_etamin_first_commands_StartupCmd.__meta__ = { fields : { appModel : { inject : null}}};
 com_etamin_first_commands_StartupCmd.__rtti = "<class path=\"com.etamin.first.commands.StartupCmd\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Command\"/>\n\t<appModel public=\"1\">\n\t\t<c path=\"com.etamin.first.model.AppModel\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</appModel>\n\t<execute public=\"1\" set=\"method\" line=\"21\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></execute>\n\t<new public=\"1\" set=\"method\" line=\"17\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 com_etamin_first_model_AppModel.__meta__ = { fields : { changeSectionSgnl : { inject : null}, directChangeDataSgnl : { inject : null}}};
-com_etamin_first_model_AppModel.__rtti = "<class path=\"com.etamin.first.model.AppModel\" params=\"\">\n\t<_value><x path=\"Int\"/></_value>\n\t<changeSectionSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.ChangeSectionSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</changeSectionSgnl>\n\t<directChangeDataSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.data.DirectChangeDataSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</directChangeDataSgnl>\n\t<loadSetup public=\"1\" set=\"method\" line=\"29\"><f a=\"\"><x path=\"Void\"/></f></loadSetup>\n\t<changeSection public=\"1\" set=\"method\" line=\"45\">\n\t\t<f a=\"sectionVO:?delay\" v=\":0\">\n\t\t\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t\t\t<x path=\"Float\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:0}</e></m></meta>\n\t</changeSection>\n\t<new public=\"1\" set=\"method\" line=\"24\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+com_etamin_first_model_AppModel.__rtti = "<class path=\"com.etamin.first.model.AppModel\" params=\"\">\n\t<_value><x path=\"Int\"/></_value>\n\t<changeSectionSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.ChangeSectionSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</changeSectionSgnl>\n\t<directChangeDataSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.data.DirectChangeDataSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</directChangeDataSgnl>\n\t<loadSetup public=\"1\" set=\"method\" line=\"29\"><f a=\"\"><x path=\"Void\"/></f></loadSetup>\n\t<changeSection public=\"1\" set=\"method\" line=\"45\">\n\t\t<f a=\"sectionVO:?delay\" v=\":0\">\n\t\t\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t\t\t<x path=\"Float\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:0}</e></m></meta>\n\t</changeSection>\n\t<new public=\"1\" set=\"method\" line=\"24\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+com_etamin_first_services_data_LoadDataService.__meta__ = { fields : { navigatorModel : { inject : null}, appModel : { inject : null}}};
+com_etamin_first_services_data_LoadDataService.__rtti = "<class path=\"com.etamin.first.services.data.LoadDataService\" params=\"\">\n\t<implements path=\"etaminstudio.core.services.data.ILoadDataService\"/>\n\t<_sectionVO><c path=\"etaminstudio.core.definitions.SectionVO\"/></_sectionVO>\n\t<navigatorModel public=\"1\">\n\t\t<c path=\"etaminstudio.core.model.NavigatorModel\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</navigatorModel>\n\t<appModel public=\"1\">\n\t\t<c path=\"com.etamin.first.model.AppModel\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</appModel>\n\t<getData public=\"1\" set=\"method\" line=\"31\">\n\t\t<f a=\"sectionVO:?delay\" v=\":0\">\n\t\t\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t\t\t<x path=\"Int\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:0}</e></m></meta>\n\t</getData>\n\t<changeSection public=\"1\" set=\"method\" line=\"53\"><f a=\"sectionVO\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></changeSection>\n\t<new public=\"1\" set=\"method\" line=\"23\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_bundles_mvcs_Mediator.__meta__ = { fields : { eventMap : { inject : null}, eventDispatcher : { inject : null}}};
 robotlegs_bender_bundles_mvcs_Mediator.__rtti = "<class path=\"robotlegs.bender.bundles.mvcs.Mediator\" params=\"\">\n\t<implements path=\"robotlegs.bender.extensions.mediatorMap.api.IMediator\"/>\n\t<eventMap public=\"1\">\n\t\t<c path=\"robotlegs.bender.extensions.localEventMap.api.IEventMap\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</eventMap>\n\t<eventDispatcher public=\"1\">\n\t\t<c path=\"openfl.events.IEventDispatcher\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</eventDispatcher>\n\t<viewComponent public=\"1\" get=\"null\"><d/></viewComponent>\n\t<initialize public=\"1\" set=\"method\" line=\"48\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<destroy public=\"1\" set=\"method\" line=\"55\"><f a=\"\"><x path=\"Void\"/></f></destroy>\n\t<postDestroy public=\"1\" set=\"method\" line=\"63\"><f a=\"\"><x path=\"Void\"/></f></postDestroy>\n\t<addViewListener set=\"method\" line=\"72\">\n\t\t<f a=\"eventString:listener:?eventClass\" v=\"::null\">\n\t\t\t<c path=\"String\"/>\n\t\t\t<d/>\n\t\t\t<x path=\"Class\"><d/></x>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{eventClass:null}</e></m></meta>\n\t</addViewListener>\n\t<addContextListener set=\"method\" line=\"77\">\n\t\t<f a=\"eventString:listener:?eventClass\" v=\"::null\">\n\t\t\t<c path=\"String\"/>\n\t\t\t<d/>\n\t\t\t<x path=\"Class\"><d/></x>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{eventClass:null}</e></m></meta>\n\t</addContextListener>\n\t<removeViewListener set=\"method\" line=\"82\">\n\t\t<f a=\"eventString:listener:?eventClass\" v=\"::null\">\n\t\t\t<c path=\"String\"/>\n\t\t\t<d/>\n\t\t\t<x path=\"Class\"><d/></x>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{eventClass:null}</e></m></meta>\n\t</removeViewListener>\n\t<removeContextListener set=\"method\" line=\"87\">\n\t\t<f a=\"eventString:listener:?eventClass\" v=\"::null\">\n\t\t\t<c path=\"String\"/>\n\t\t\t<d/>\n\t\t\t<x path=\"Class\"><d/></x>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{eventClass:null}</e></m></meta>\n\t</removeContextListener>\n\t<dispatch set=\"method\" line=\"92\"><f a=\"event\">\n\t<c path=\"openfl.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></dispatch>\n\t<meta>\n\t\t<m n=\":keepSub\"/>\n\t\t<m n=\":rtti\"/>\n\t</meta>\n</class>";
-com_etamin_first_view_home_HomeMediator.__meta__ = { fields : { view : { inject : null}}};
-com_etamin_first_view_home_HomeMediator.__rtti = "<class path=\"com.etamin.first.view.home.HomeMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"com.etamin.first.view.home.HomeView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<new public=\"1\" set=\"method\" line=\"17\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+com_etamin_first_view_home_HomeMediator.__meta__ = { fields : { view : { inject : null}, changeSectionSgnl : { inject : null}}};
+com_etamin_first_view_home_HomeMediator.__rtti = "<class path=\"com.etamin.first.view.home.HomeMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"com.etamin.first.view.home.HomeView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<changeSectionSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.ChangeSectionSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</changeSectionSgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"27\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<onTouchCB public=\"1\" set=\"method\" line=\"38\"><f a=\"\"><x path=\"Void\"/></f></onTouchCB>\n\t<new public=\"1\" set=\"method\" line=\"22\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 starling_events_EventDispatcher.sBubbleChains = [];
 lime_math_Matrix3.__identity = new lime_math_Matrix3();
 openfl_geom_Matrix.__identity = new openfl_geom_Matrix();
@@ -57424,6 +57898,12 @@ starling_display_DisplayObjectContainer.sSortBuffer = openfl__$Vector_Vector_$Im
 starling_display_Sprite.sHelperMatrix = new openfl_geom_Matrix();
 starling_display_Sprite.sHelperPoint = new openfl_geom_Point();
 starling_display_Sprite.sHelperRect = new openfl_geom_Rectangle();
+com_etamin_first_view_second_SecondMediator.__meta__ = { fields : { view : { inject : null}}};
+com_etamin_first_view_second_SecondMediator.__rtti = "<class path=\"com.etamin.first.view.second.SecondMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"com.etamin.first.view.second.SecondView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<initialize public=\"1\" set=\"method\" line=\"22\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<new public=\"1\" set=\"method\" line=\"17\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+etaminstudio_core_commands_ChangeSectionCmd.__meta__ = { fields : { sectionVO : { inject : null}, sectionEngineModel : { inject : null}, dataService : { inject : null}}};
+etaminstudio_core_commands_ChangeSectionCmd.__rtti = "<class path=\"etaminstudio.core.commands.ChangeSectionCmd\" params=\"\">\n\t<sectionVO public=\"1\">\n\t\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionVO>\n\t<sectionEngineModel public=\"1\">\n\t\t<c path=\"etaminstudio.core.model.NavigatorModel\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionEngineModel>\n\t<dataService public=\"1\">\n\t\t<c path=\"etaminstudio.core.services.data.ILoadDataService\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</dataService>\n\t<execute public=\"1\" set=\"method\" line=\"23\"><f a=\"\"><x path=\"Void\"/></f></execute>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+etaminstudio_core_commands_SectionChangedCmd.__meta__ = { fields : { sectionEngineModel : { inject : null}}};
+etaminstudio_core_commands_SectionChangedCmd.__rtti = "<class path=\"etaminstudio.core.commands.SectionChangedCmd\" params=\"\">\n\t<sectionEngineModel public=\"1\">\n\t\t<c path=\"etaminstudio.core.model.NavigatorModel\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionEngineModel>\n\t<execute public=\"1\" set=\"method\" line=\"15\"><f a=\"\"><x path=\"Void\"/></f></execute>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 etaminstudio_core_definitions_AppConstants.ratioH = 1;
 etaminstudio_core_definitions_AppConstants.ratioV = 1;
 etaminstudio_core_definitions_AppConstants.rapport = 1;
@@ -57434,12 +57914,14 @@ etaminstudio_core_definitions_NavigatorTransitions.MOVE_RIGHT = "MoveToTheRight"
 etaminstudio_core_definitions_NavigatorTransitions.MOVE_LEFT = "MoveToTheLeft";
 etaminstudio_core_definitions_NavigatorTransitions.MOVE_TOP = "MoveToTheTop";
 etaminstudio_core_definitions_NavigatorTransitions.MOVE_BOTTOM = "MoveToTheBottom";
+etaminstudio_core_model_NavigatorModel.__meta__ = { fields : { sectionChangingSgnl : { inject : null}}};
+etaminstudio_core_model_NavigatorModel.__rtti = "<class path=\"etaminstudio.core.model.NavigatorModel\" params=\"\">\n\t<sectionChangingSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangingSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangingSgnl>\n\t<currentSection public=\"1\"><c path=\"etaminstudio.core.definitions.SectionVO\"/></currentSection>\n\t<isSectionChanging public=\"1\" expr=\"false\" line=\"21\">\n\t\t<x path=\"Bool\"/>\n\t\t<meta><m n=\":value\"><e>false</e></m></meta>\n\t</isSectionChanging>\n\t<historyVec public=\"1\"><c path=\"Array\"><c path=\"etaminstudio.core.definitions.SectionVO\"/></c></historyVec>\n\t<addToHistory public=\"1\" set=\"method\" line=\"30\"><f a=\"sectionVO\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></addToHistory>\n\t<removeFromHistory public=\"1\" set=\"method\" line=\"35\"><f a=\"\"><x path=\"Void\"/></f></removeFromHistory>\n\t<changeSection public=\"1\" set=\"method\" line=\"43\"><f a=\"currentSection\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></changeSection>\n\t<backInHistory public=\"1\" set=\"method\" line=\"57\"><f a=\"isBackHome\">\n\t<x path=\"Bool\"/>\n\t<x path=\"Void\"/>\n</f></backInHistory>\n\t<updateHistoryElementData public=\"1\" set=\"method\" line=\"89\"><f a=\"idElement:field:data\">\n\t<x path=\"Int\"/>\n\t<c path=\"String\"/>\n\t<d/>\n\t<x path=\"Void\"/>\n</f></updateHistoryElementData>\n\t<updateHistoryElementConfig public=\"1\" set=\"method\" line=\"100\"><f a=\"idElement:field:data\">\n\t<x path=\"Int\"/>\n\t<c path=\"String\"/>\n\t<d/>\n\t<x path=\"Void\"/>\n</f></updateHistoryElementConfig>\n\t<new public=\"1\" set=\"method\" line=\"24\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 etaminstudio_core_view_AppRootMediator.__meta__ = { fields : { view : { inject : null}, startupSgnl : { inject : null}}};
 etaminstudio_core_view_AppRootMediator.__rtti = "<class path=\"etaminstudio.core.view.AppRootMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"etaminstudio.core.view.AppRootView\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<startupSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.config.StartupSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</startupSgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"23\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onReady set=\"method\" line=\"33\"><f a=\"\"><x path=\"Void\"/></f></_onReady>\n\t<new public=\"1\" set=\"method\" line=\"17\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 robotlegs_bender_extensions_display_stage3D_starling_impl_StarlingLayer.__rtti = "<class path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\" params=\"\">\n\t<extends path=\"starling.display.Sprite\"/>\n\t<implements path=\"robotlegs.bender.extensions.display.base.api.ILayer\"/>\n\t<starling><c path=\"starling.core.Starling\"/></starling>\n\t<renderContext public=\"1\" get=\"accessor\" set=\"accessor\">\n\t\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t\t<meta><m n=\":isVar\"/></meta>\n\t</renderContext>\n\t<process public=\"1\" set=\"method\" line=\"25\"><f a=\"\"><x path=\"Void\"/></f></process>\n\t<setStarling public=\"1\" set=\"method\" line=\"30\"><f a=\"starling\">\n\t<c path=\"starling.core.Starling\"/>\n\t<x path=\"Void\"/>\n</f></setStarling>\n\t<setTo public=\"1\" set=\"method\" line=\"35\"><f a=\"x:y:width:height\">\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setTo>\n\t<set_renderContext public=\"1\" set=\"method\" line=\"42\"><f a=\"value\">\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n\t<c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/>\n</f></set_renderContext>\n\t<get_renderContext public=\"1\" set=\"method\" line=\"47\"><f a=\"\"><c path=\"robotlegs.bender.extensions.display.base.api.IRenderContext\"/></f></get_renderContext>\n\t<new public=\"1\" set=\"method\" line=\"20\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
-etaminstudio_core_view_AppRootView.__rtti = "<class path=\"etaminstudio.core.view.AppRootView\" params=\"\">\n\t<extends path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\"/>\n\t<onReadySgnl public=\"1\"><c path=\"msignal.Signal0\"/></onReadySgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"28\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onAddedToStage set=\"method\" line=\"33\"><f a=\"e\">\n\t<c path=\"openfl.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></_onAddedToStage>\n\t<start public=\"1\" set=\"method\" line=\"44\"><f a=\"assets\">\n\t<c path=\"starling.utils.AssetManager\"/>\n\t<x path=\"Void\"/>\n</f></start>\n\t<new public=\"1\" set=\"method\" line=\"19\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta><m n=\":directlyUsed\"/></meta>\n</class>";
+etaminstudio_core_view_AppRootView.__rtti = "<class path=\"etaminstudio.core.view.AppRootView\" params=\"\">\n\t<extends path=\"robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer\"/>\n\t<onReadySgnl public=\"1\"><c path=\"msignal.Signal0\"/></onReadySgnl>\n\t<initialize public=\"1\" set=\"method\" line=\"29\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onAddedToStage set=\"method\" line=\"37\"><f a=\"e\">\n\t<c path=\"openfl.events.Event\"/>\n\t<x path=\"Void\"/>\n</f></_onAddedToStage>\n\t<start public=\"1\" set=\"method\" line=\"51\"><f a=\"assets\">\n\t<c path=\"starling.utils.AssetManager\"/>\n\t<x path=\"Void\"/>\n</f></start>\n\t<new public=\"1\" set=\"method\" line=\"20\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta><m n=\":directlyUsed\"/></meta>\n</class>";
 etaminstudio_core_view_NavigatorMediator.__meta__ = { fields : { view : { inject : null}, sectionChangingSgnl : { inject : null}, sectionChangedSgnl : { inject : null}}};
-etaminstudio_core_view_NavigatorMediator.__rtti = "<class path=\"etaminstudio.core.view.NavigatorMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"etaminstudio.core.view.Navigator\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<sectionChangingSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangingSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangingSgnl>\n\t<sectionChangedSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangedSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangedSgnl>\n\t<_isRegistred expr=\"false\" line=\"28\">\n\t\t<x path=\"Bool\"/>\n\t\t<meta><m n=\":value\"><e>false</e></m></meta>\n\t</_isRegistred>\n\t<_transition><c path=\"String\"/></_transition>\n\t<_transitionType><c path=\"String\"/></_transitionType>\n\t<_duration><x path=\"Float\"/></_duration>\n\t<_mask><c path=\"starling.display.Sprite\"/></_mask>\n\t<initialize public=\"1\" set=\"method\" line=\"41\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onResize set=\"method\" line=\"53\"><f a=\"e\">\n\t<c path=\"starling.events.ResizeEvent\"/>\n\t<x path=\"Void\"/>\n</f></_onResize>\n\t<changeSection public=\"1\" set=\"method\" line=\"58\"><f a=\"newSection\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></changeSection>\n\t<setSection public=\"1\" set=\"method\" line=\"67\"><f a=\"sectionName:data:transitionType:duration\">\n\t<c path=\"String\"/>\n\t<c path=\"etaminstudio.core.definitions.ViewVO\"/>\n\t<c path=\"String\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setSection>\n\t<transition public=\"1\" set=\"method\" line=\"113\">\n\t\t<f a=\"?delay\" v=\"50\">\n\t\t\t<x path=\"Int\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:50}</e></m></meta>\n\t</transition>\n\t<dispose public=\"1\" set=\"method\" line=\"167\"><f a=\"\"><x path=\"Void\"/></f></dispose>\n\t<new public=\"1\" set=\"method\" line=\"36\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
+etaminstudio_core_view_NavigatorMediator.__rtti = "<class path=\"etaminstudio.core.view.NavigatorMediator\" params=\"\">\n\t<extends path=\"robotlegs.bender.bundles.mvcs.Mediator\"/>\n\t<view public=\"1\">\n\t\t<c path=\"etaminstudio.core.view.Navigator\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</view>\n\t<sectionChangingSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangingSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangingSgnl>\n\t<sectionChangedSgnl public=\"1\">\n\t\t<c path=\"etaminstudio.core.signals.section.SectionChangedSgnl\"/>\n\t\t<meta><m n=\"inject\"/></meta>\n\t</sectionChangedSgnl>\n\t<_isRegistred expr=\"false\" line=\"30\">\n\t\t<x path=\"Bool\"/>\n\t\t<meta><m n=\":value\"><e>false</e></m></meta>\n\t</_isRegistred>\n\t<_transition><c path=\"String\"/></_transition>\n\t<_transitionType><c path=\"String\"/></_transitionType>\n\t<_duration><x path=\"Float\"/></_duration>\n\t<_mask><c path=\"starling.display.Sprite\"/></_mask>\n\t<initialize public=\"1\" set=\"method\" line=\"43\" override=\"1\"><f a=\"\"><x path=\"Void\"/></f></initialize>\n\t<_onResize set=\"method\" line=\"55\"><f a=\"e\">\n\t<c path=\"starling.events.ResizeEvent\"/>\n\t<x path=\"Void\"/>\n</f></_onResize>\n\t<changeSection public=\"1\" set=\"method\" line=\"60\"><f a=\"newSection\">\n\t<c path=\"etaminstudio.core.definitions.SectionVO\"/>\n\t<x path=\"Void\"/>\n</f></changeSection>\n\t<setSection public=\"1\" set=\"method\" line=\"69\"><f a=\"sectionName:data:transitionType:duration\">\n\t<c path=\"String\"/>\n\t<c path=\"etaminstudio.core.definitions.ViewVO\"/>\n\t<c path=\"String\"/>\n\t<x path=\"Float\"/>\n\t<x path=\"Void\"/>\n</f></setSection>\n\t<transition public=\"1\" set=\"method\" line=\"116\">\n\t\t<f a=\"?delay\" v=\"50\">\n\t\t\t<x path=\"Int\"/>\n\t\t\t<x path=\"Void\"/>\n\t\t</f>\n\t\t<meta><m n=\":value\"><e>{delay:50}</e></m></meta>\n\t</transition>\n\t<dispose public=\"1\" set=\"method\" line=\"171\"><f a=\"\"><x path=\"Void\"/></f></dispose>\n\t<new public=\"1\" set=\"method\" line=\"38\"><f a=\"\"><x path=\"Void\"/></f></new>\n\t<meta>\n\t\t<m n=\":directlyUsed\"/>\n\t\t<m n=\":rtti\"/>\n\t\t<m n=\":keepSub\"/>\n\t</meta>\n</class>";
 haxe_Serializer.USE_CACHE = false;
 haxe_Serializer.USE_ENUM_INDEX = false;
 haxe_Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
@@ -57472,6 +57954,8 @@ lime__$backend_html5_HTML5Window.dummyCharacter = "";
 lime__$backend_html5_HTML5Window.windowID = 0;
 lime_graphics_Image.__base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 lime_graphics_cairo__$CairoFTFontFace_CairoFTFontFace_$Impl_$.FT_LOAD_FORCE_AUTOHINT = 32;
+lime_graphics_opengl_ExtensionAnisotropicFiltering.TEXTURE_MAX_ANISOTROPY_EXT = 34046;
+lime_graphics_opengl_ExtensionAnisotropicFiltering.MAX_TEXTURE_MAX_ANISOTROPY_EXT = 34047;
 lime_graphics_opengl_ExtensionPackedDepthStencil.DEPTH24_STENCIL8_EXT = 35056;
 lime_graphics_opengl_GL.DEPTH_BUFFER_BIT = 256;
 lime_graphics_opengl_GL.STENCIL_BUFFER_BIT = 1024;
@@ -57857,8 +58341,6 @@ lime_media_openal_ALC.EXTENSIONS = 4102;
 lime_media_openal_ALC.ENUMERATE_ALL_EXT = 1;
 lime_media_openal_ALC.DEFAULT_ALL_DEVICES_SPECIFIER = 4114;
 lime_media_openal_ALC.ALL_DEVICES_SPECIFIER = 4115;
-lime_system_BackgroundWorker.MESSAGE_COMPLETE = "__COMPLETE__";
-lime_system_BackgroundWorker.MESSAGE_ERROR = "__ERROR__";
 lime_system_JNI.alreadyCreated = new haxe_ds_StringMap();
 lime_system_JNI.initialized = false;
 lime_system_System.__directories = new haxe_ds_IntMap();
@@ -58534,6 +59016,11 @@ openfl__$internal_renderer_canvas_CanvasGraphics.fillCommands = new openfl__$int
 openfl__$internal_renderer_canvas_CanvasGraphics.strokeCommands = new openfl__$internal_renderer_DrawCommandBuffer();
 openfl__$internal_renderer_canvas_CanvasGraphics.hitTestCanvas = window.document.createElement("canvas");
 openfl__$internal_renderer_canvas_CanvasGraphics.hitTestContext = openfl__$internal_renderer_canvas_CanvasGraphics.hitTestCanvas.getContext("2d");
+openfl__$internal_renderer_dom_DOMTextField.__regexColor = new EReg("color=(\"#([^\"]+)\"|'#([^']+)')","i");
+openfl__$internal_renderer_dom_DOMTextField.__regexFace = new EReg("face=(\"([^\"]+)\"|'([^']+)')","i");
+openfl__$internal_renderer_dom_DOMTextField.__regexFont = new EReg("<font ([^>]+)>","gi");
+openfl__$internal_renderer_dom_DOMTextField.__regexCloseFont = new EReg("</font>","gi");
+openfl__$internal_renderer_dom_DOMTextField.__regexSize = new EReg("size=(\"([^\"]+)\"|'([^']+)')>","i");
 openfl__$internal_stage3D_AGALConverter.limitedProfile = true;
 openfl__$internal_stage3D_Context3DStateCache.FLOATS_PER_REGISTER = 4;
 openfl__$internal_stage3D_Context3DStateCache.MAX_NUM_REGISTERS = 1024;
@@ -58858,6 +59345,7 @@ openfl_text_TextField.__regexBlockIndent = new EReg("blockindent=(\"([^\"]+)\"|'
 openfl_text_TextField.__regexBreakTag = new EReg("<br\\s*/?>","gi");
 openfl_text_TextField.__regexEntities = [new EReg("&quot;","g"),new EReg("&apos;","g"),new EReg("&amp;","g"),new EReg("&lt;","g"),new EReg("&gt;","g")];
 openfl_text_TextField.__regexFace = new EReg("face=(\"([^\"]+)\"|'([^']+)')","i");
+openfl_text_TextField.__regexHref = new EReg("href=(\"([^\"]+)\"|'([^']+)')","i");
 openfl_text_TextField.__regexHTMLTag = new EReg("<.*?>","g");
 openfl_text_TextField.__regexIndent = new EReg(" indent=(\"([^\"]+)\"|'([^']+)')","i");
 openfl_text_TextField.__regexLeading = new EReg("leading=(\"([^\"]+)\"|'([^']+)')","i");

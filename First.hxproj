@@ -16,21 +16,21 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,7,3" />
-    <class path="C:\HaxeToolkit\haxe\lib\lime\3,7,2" />
-    <class path="C:\HaxeToolkit\haxe\lib\starling\1,8,3" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,8,1" />
+    <class path="C:\HaxeToolkit\haxe\lib\lime\3,7,4" />
     <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,7" />
     <class path="C:\HaxeToolkit\haxe\lib\robotlegs\0,4,1" />
     <class path="C:\HaxeToolkit\haxe\lib\swiftsuspenders\0,2,0" />
     <class path="C:\HaxeToolkit\haxe\lib\msignal\1,2,4" />
+    <class path="C:\HaxeToolkit\haxe\lib\starling\1,8,3" />
     <class path="src" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,7,3\externs\core\openfl" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,7,3\externs\extras" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,8,1\externs\core\openfl" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\4,8,1\externs\extras" />
     <class path="bin\html5\release\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="openfl=4.7.3&#xA;lime=3.7.2&#xA;starling=1.8.3&#xA;actuate=1.8.7&#xA;robotlegs=0.4.1&#xA;swiftsuspenders=0.2.0&#xA;msignal=1.2.4&#xA;tools=3.7.2&#xA;howlerjs&#xA;no-compilation&#xA;openfl-html5&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5&#xA;display" />
+    <option directives="openfl=4.8.1&#xA;lime=3.7.4&#xA;actuate=1.8.7&#xA;robotlegs=0.4.1&#xA;swiftsuspenders=0.2.0&#xA;msignal=1.2.4&#xA;starling=1.8.3&#xA;tools=3.7.4&#xA;howlerjs&#xA;no-compilation&#xA;openfl-html5&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5&#xA;display" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />

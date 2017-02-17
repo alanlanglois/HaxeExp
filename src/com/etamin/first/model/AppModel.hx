@@ -30,7 +30,7 @@ class AppModel
 	{
 		//SectionNameList.init();			
 		trace("loadSetup :: ");
-		changeSection( new SectionVO( "com.etamin.first.view", new ViewVO(), false, false, NavigatorTransitions.ALPHA, 1, null));
+		changeSection( new SectionVO( "com.etamin.first.view.home.HomeView", new ViewVO(), false, false, NavigatorTransitions.ALPHA, 1, null));
 	}
 	
 	//private function set_value(value:Int):Int 

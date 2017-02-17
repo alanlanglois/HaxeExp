@@ -71,7 +71,8 @@ class SectionView extends Sprite implements IView
 		ratioH=AppConstants.ratioH;
 		ratioV=AppConstants.ratioV;
 		
-		if (transition != null) transition.bind(0);
+		trace("INITIALIZED :: " + transition);
+		if (transition != null) transition(0);
 	}
 	
 	public function setOrientation(orientation:String):Void {}

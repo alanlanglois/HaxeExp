@@ -15,6 +15,7 @@ import robotlegs.bender.bundles.mvcs.MVCSBundle;
 import robotlegs.bender.bundles.stage3D.Stage3DBundle;
 import robotlegs.bender.bundles.stage3D.StarlingBundle;
 import robotlegs.bender.extensions.contextView.ContextView;
+import robotlegs.bender.framework.api.IContext;
 import robotlegs.bender.framework.impl.Context;
 
 import haxe.Timer;
@@ -42,7 +43,7 @@ import starling.utils.RectangleUtil;
 class Main extends Sprite 
 {
     private var mStarling:Starling;
-	var mContext:Context;
+	var mContext:IContext;
 
 	public function new() 
 	{
@@ -58,11 +59,7 @@ class Main extends Sprite
 		
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		
-        start();
-		
-		
-		
-		
+        start();		
     }
 	
 	private function start():Void
@@ -75,43 +72,54 @@ class Main extends Sprite
         Starling.handleLostContext = true; // recommended everywhere when using AssetManager
         RenderTexture.optimizePersistentBuffers = true; // should be safe on Desktop
 
-        mStarling = new Starling(AppRootView, stage, null, null, Context3DRenderMode.AUTO, "auto");
-        mStarling.stage.stageWidth = 800;
-        mStarling.stage.stageHeight = 640;
-        mStarling.simulateMultitouch = true;
-        mStarling.enableErrorChecking = Capabilities.isDebugger;
-        mStarling.addEventListener(Event.ROOT_CREATED, _onRootCreated);
+        //mStarling = new Starling(AppRootView, stage, null, null, Context3DRenderMode.AUTO, "auto");
+        //mStarling.stage.stageWidth = 800;
+        //mStarling.stage.stageHeight = 640;
+        //mStarling.simulateMultitouch = true;
+        //mStarling.enableErrorChecking = Capabilities.isDebugger;
+        //mStarling.addEventListener(Event.ROOT_CREATED, _onRootCreated);
+        //mStarling.addEventListener(Event.CONTEXT3D_CREATE, _on3DContectCreated);
 		
-		
-		mContext = new Context();
-		mContext.install([MVCSBundle, Stage3DBundle, StarlingBundle]);
-		mContext.configure([AppConfig, this, mStarling]);
-		mContext.configure(new ContextView(this));
-		mContext.initialize();
+		mContext = new Context()
+			.install([MVCSBundle, Stage3DBundle, StarlingBundle])
+			.configure(AppConfig)
+			.configure(new ContextView(this));
+			
+		//mContext = new Context();
+		//mContext.install([MVCSBundle, Stage3DBundle, StarlingBundle]);
+		//mContext.configure(AppConfig);
+		//mContext.configure(new ContextView(this));
+		//mContext.initialize();
 		
 		
         this.stage.addEventListener(Event.RESIZE, onResize, false, Max.INT_MAX_VALUE, true);
 
-        mStarling.start();
+        //mStarling.start();
     }
+	
+	private function _on3DContectCreated(e:Event):Void 
+	{
+        //mStarling.removeEventListener(Event.CONTEXT3D_CREATE, _on3DContectCreated);
+		
+	}
 	
 	private function _onRootCreated(e:Event):Void 
 	{
-		var assetManager:AssetManager = new AssetManager( AppConstants.starlingRatio, false );
-		assetManager.verbose = true;
+		//var assetManager:AssetManager = new AssetManager( AppConstants.starlingRatio, false );
+		//assetManager.verbose = true;
 		
-		cast ( mStarling.root, AppRootView ).start( assetManager );
+		//cast ( mStarling.root, AppRootView ).start( assetManager );
 	}
 	
 	private function onResize(e:openfl.events.Event):Void
     {
 		trace("+++> " + stage.stageWidth + "x" + stage.stageHeight);
         //var viewPort:Rectangle = RectangleUtil.fit(new Rectangle(0, 0, 800, 640), new Rectangle(0, 0, stage.stageWidth, stage.stageHeight));
-        var viewPort:Rectangle = new Rectangle(0, 0, 800, 640);
-        try
-        {
-            this.mStarling.viewPort = viewPort;
-        }
-        catch(error:Error) {}
+        //var viewPort:Rectangle = new Rectangle(0, 0, 800, 640);
+        //try
+        //{
+            //this.mStarling.viewPort = viewPort;
+        //}
+        //catch(error:Error) {}
     }
 }

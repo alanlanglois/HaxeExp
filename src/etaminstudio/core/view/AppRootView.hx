@@ -1,10 +1,10 @@
 package etaminstudio.core.view;
 
-import msignal.Signal;
+import etaminstudio.core.definitions.AppConstants;
+import msignal.Signal.Signal0;
 import openfl.events.Event;
 import robotlegs.bender.extensions.display.stage3D.starling.impl.StarlingLayer;
 import starling.display.Quad;
-import starling.display.Sprite;
 import starling.utils.AssetManager;
 
 /**
@@ -13,6 +13,7 @@ import starling.utils.AssetManager;
  */
 class AppRootView extends StarlingLayer
 {
+	//var assetManager:AssetManager;
 
 	public var onReadySgnl:Signal0;
 	
@@ -27,6 +28,9 @@ class AppRootView extends StarlingLayer
 	
 	public function initialize():Void
 	{		
+		
+		//assetManager = new AssetManager( AppConstants.starlingRatio, false );
+		//assetManager.verbose = true;
 		trace("++++++++++++++++ VIEW INITIALIZE");
 	}
 	
@@ -39,6 +43,9 @@ class AppRootView extends StarlingLayer
 		quad.y = 10;
 		addChild( quad );
 		
+		var assetManager:AssetManager = new AssetManager( AppConstants.starlingRatio, false );
+		assetManager.verbose = true;
+		start( assetManager );
 	}
 	
 	public function start(assets:AssetManager):Void

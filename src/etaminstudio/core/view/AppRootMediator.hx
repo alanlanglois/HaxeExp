@@ -23,16 +23,16 @@ class AppRootMediator extends Mediator
 	override public function initialize():Void 
 	{
 		trace("+++++++++++++++++++++++++++++");
+		view.onReadySgnl.addOnce(_onReady);
 		super.initialize();
 		
 		view.initialize();
-		view.onReadySgnl.addOnce(_onReady);
 		
 	}
 	
 	private function _onReady():Void 
 	{
-		
+		trace("_onReady dispatched +++++++++++++++++++++++++++++>");
 		startupSgnl.dispatch();
 
 	}
